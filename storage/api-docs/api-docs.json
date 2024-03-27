@@ -1,0 +1,4251 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "HRM Laravel Api",
+        "version": "10.0"
+    },
+    "paths": {
+        "/api/attendance": {
+            "get": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Get All attendances. Permission required = attendance.list",
+                "description": "\n * This endpoint retrieves attendance records based on the user's role:\n * Tenants: View their own attendance and their company's employees.\n * Companies: View attendance of their employees only.",
+                "operationId": "6913f5107b5fba6564836cfa60c422e4",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Mark a new attendance. Permission required = attendance.store",
+                "description": "Attendance can be marked by:\n *     Tenant: Input fields are required for tenant-marked attendance.\n *     Company: Input fields are required for company-marked attendance.\n *     Employee: If an employee is marking attendance, no input is needed. Attendance is automatically\n *     recorded twice a day: once for check-in and again for check-out, according to the current time.",
+                "operationId": "b89db106e9f781599fec5bcf0264da74",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The name of the attendance => required",
+                                        "type": "string",
+                                        "example": "newattendance"
+                                    },
+                                    "check_in": {
+                                        "description": "The check_in time of the attendance => required and the accepted format is 10:00 PM",
+                                        "type": "string",
+                                        "example": "10:00 PM"
+                                    },
+                                    "check_out": {
+                                        "description": "The check_out time of the attendance => required and the accepted format is 10:00 PM",
+                                        "type": "string",
+                                        "example": "10:00 PM"
+                                    },
+                                    "type": {
+                                        "description": "The type of the attendance => nullable, only accepted are late,absent,present,leave",
+                                        "type": "string",
+                                        "example": "late,absent,present,leave"
+                                    },
+                                    "reason": {
+                                        "description": "The reason of the leave,late or absend and its value should only be filled if the type is late,absent or leave  => nullable",
+                                        "type": "string",
+                                        "example": "he was sick"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Attendance created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/attendance/get-employee": {
+            "post": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "GET The Employee. Permission required = attendance.store",
+                "description": "This endpoint retrieves a specific employee by providing their Emirates ID.",
+                "operationId": "38f5871676b9bbfd4c6b73102150f254",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "emirates_id": {
+                                        "description": "The Emirates ID of the employee (required)",
+                                        "type": "number",
+                                        "example": "12121211212"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/attendance/{id}": {
+            "get": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "GET The attendance. Permission required = attendance.edit",
+                "description": "This endpoint retrieves a specific attendance by providing its ID.",
+                "operationId": "da3199e0737cefbab6ba8bfbe0406b89",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the attendance",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Update the attendance. Permission required = attendance.update",
+                "description": "Only the tenant and the company can update attendance, and they can only update attendance records that were created on the same day as the update.",
+                "operationId": "6650e427d85ab4c674484e280ded3950",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the attendance to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The name of the attendance => required",
+                                        "type": "string",
+                                        "example": "newattendance"
+                                    },
+                                    "check_in": {
+                                        "description": "The check_in time of the attendance => required and the accepted format is 10:00 PM",
+                                        "type": "string",
+                                        "example": "10:00 PM"
+                                    },
+                                    "check_out": {
+                                        "description": "The check_out time of the attendance => required and the accepted format is 10:00 PM",
+                                        "type": "string",
+                                        "example": "10:00 PM"
+                                    },
+                                    "type": {
+                                        "description": "The type of the attendance => nullable, only accepted are late,absent,present,leave",
+                                        "type": "string",
+                                        "example": "late,absent,present,leave"
+                                    },
+                                    "reason": {
+                                        "description": "The reason of the leave,late or absent and its value should only be filled if the type is late,absent or leave  => nullable",
+                                        "type": "text",
+                                        "example": "he was sick"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Attendance updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/attendance-periodic-report/get-employee": {
+            "post": {
+                "tags": [
+                    "Attendance Report"
+                ],
+                "summary": "GET The Employee.Permission required = attendance-report.list",
+                "description": "This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
+                "operationId": "d2cd88c0df4e3c0736fbf8646a4c1249",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "emirates_id": {
+                                        "description": "The emirates_id of the employee (required)",
+                                        "type": "number",
+                                        "example": "12121211212"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/attendance-periodic-report": {
+            "post": {
+                "tags": [
+                    "Attendance Report"
+                ],
+                "summary": "GET attendance-periodic-report.Permission required = attendance-report.list",
+                "description": "This endpoint get  attendance-periodic-report.",
+                "operationId": "92b014be2be3d03717530957fa57fca0",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "from_date": {
+                                        "description": "The date from which you want to start the report => required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-11"
+                                    },
+                                    "to_date": {
+                                        "description": "The date to which you want to end the report => required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-11"
+                                    },
+                                    "employee_id": {
+                                        "description": "the id of the employee for which you want to get the report",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "attendance-daily-report created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/attendance-daily-report": {
+            "post": {
+                "tags": [
+                    "Attendance Report"
+                ],
+                "summary": "GET attendance-daily-report.Permission required = attendance-report.list",
+                "description": "This endpoint gets attendance-daily-report.",
+                "operationId": "378f612fe8e9325de9c8cb687cdda8ae",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "date": {
+                                        "description": "The date of the attendance-daily-report => required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-11"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "attendance-daily-report created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/attendance-roster": {
+            "get": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "Get All attendance-rosters.Permission required = attendance-roster.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "8888fe9855b1eb2abbbb888baeff6a68",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "create a new attendance roster. Permission required = attendance-roster.store",
+                "description": "You need to give the employee_id for one time. Then give all fields in the JSON form in the attendance.\n     *",
+                "operationId": "562c9882d3893276fdc94236e2c3e710",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The id of the employee that is needed to assign to the roster (required)",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "roster_json": {
+                                        "description": "All the remaining fields will come under the roster_json like in the example in the json form",
+                                        "type": "json",
+                                        "example": {
+                                            "2024-12-24": {
+                                                "holiday": "1",
+                                                "check_in": null,
+                                                "check_out": null,
+                                                "date": "2024-12-24"
+                                            },
+                                            "2024-12-13": {
+                                                "holiday": "1",
+                                                "check_in": null,
+                                                "check_out": null,
+                                                "date": "2024-12-13"
+                                            },
+                                            "2024-12-26": {
+                                                "holiday": "1",
+                                                "check_in": null,
+                                                "check_out": null,
+                                                "date": "2024-12-26"
+                                            }
+                                        }
+                                    },
+                                    "check_in": {
+                                        "description": "The check_in time of the employee",
+                                        "type": "time",
+                                        "example": "10:00 PM"
+                                    },
+                                    "check_out": {
+                                        "description": "The check_out time of the employee",
+                                        "type": "time",
+                                        "example": "10:00 PM"
+                                    },
+                                    "holiday": {
+                                        "description": "If the specific day is a holiday then check this checkbox and leave the check_in and check_out fields null or empty. If the box is checked the input will be sent from the frontend as '1' if not checked then input will be sent as '0' from frontend side",
+                                        "type": "check_box",
+                                        "example": "1"
+                                    },
+                                    "date": {
+                                        "description": "The date for which you are defining the roster (required)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/attendance-roster/create": {
+            "get": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "Get All days .Permission required = attendance-roster.create",
+                "description": "This endpoint retrieves all days of the current month for the logged-in tenant. It indicates which days are defined as holidays by the tenant.\n     * 1. This endpoint provides all the days of the current month and indicates which days are defined as holidays by the tenant.\n     * 2. For holidays, the input fields (check_in and check_out) should be disabled, and by default, the holiday flag (holiday = 1) is set, leaving check_in and check_out as null.",
+                "operationId": "8072b449cafb310f5d11844d5021fd9f",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/attendance-roster/{id}": {
+            "get": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "GET The attendance-roster.Permission required = attendance-roster.edit",
+                "description": "This endpoint Gives a specific  attendance-roster.",
+                "operationId": "73fbd29e90cbacaa3ed1207413d6e207",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the attendance-roster ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "Delete The attendance-roster.Permission required = attendance-roster.delete",
+                "description": "This endpoint delete attendance-roster.",
+                "operationId": "6c49a23847bb8575eb62d9f49ac3f40e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the attendance-roster to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Attendance Roster"
+                ],
+                "summary": "Update the attendance-roster.Permission required = attendance-roster.update",
+                "description": "This endpoint updates a attendance-roster.",
+                "operationId": "a6b32513ece33b10d84191407bd9d8ac",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the attendance-roster to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The id of employee that is needed to assign to the roster  =>(required)",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "check_in": {
+                                        "description": "The entry time of the employee ",
+                                        "type": "time",
+                                        "example": "10:00 PM"
+                                    },
+                                    "check_out": {
+                                        "description": "The check_out time of the employee ",
+                                        "type": "time",
+                                        "example": "10:00 PM"
+                                    },
+                                    "holiday": {
+                                        "description": "If the specific day is a holiday then check this check box and leave the check_in and check_out fields null or empty",
+                                        "type": "check_box",
+                                        "example": "1"
+                                    },
+                                    "date": {
+                                        "description": "The date for which u are defining the roster => required",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/company": {
+            "get": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Get All active companies.Permission required = company.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "e1082949672c1524587be067b60da27c",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Create a new company.Permission required = company.store",
+                "description": "This endpoint creates a new company.",
+                "operationId": "2dcf852c1d14efa1ca5d575024ec31da",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the company",
+                                        "type": "string",
+                                        "example": "Acme Inc."
+                                    },
+                                    "email": {
+                                        "description": "The email of the company",
+                                        "type": "email",
+                                        "example": "manasshakoor@gmail.com"
+                                    },
+                                    "address": {
+                                        "description": "The address of the company",
+                                        "type": "string",
+                                        "example": "123 Main St, Anytown, CA"
+                                    },
+                                    "status": {
+                                        "description": "The status of the company",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "city": {
+                                        "description": "The city of the company",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "country": {
+                                        "description": "The country of the company",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "state": {
+                                        "description": "The state of the company =>nullable",
+                                        "type": "string",
+                                        "example": "state"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the company =>nullable",
+                                        "type": "number",
+                                        "example": "12345"
+                                    },
+                                    "registration_no": {
+                                        "description": "The registration_no of the company =>nullable",
+                                        "type": "number",
+                                        "example": "12345"
+                                    },
+                                    "note": {
+                                        "description": "The notes for the company =>nullable",
+                                        "type": "string",
+                                        "example": "abc"
+                                    },
+                                    "branch": {
+                                        "description": "The branch of the company =>nullable",
+                                        "type": "string",
+                                        "example": "lahore branch"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phone_no of the company=>nullable",
+                                        "type": "number",
+                                        "example": "03452987687"
+                                    },
+                                    "document_media_id": {
+                                        "description": "The document_media of the company=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "logo_media_id": {
+                                        "description": "The logo_media of the company=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Company created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/company/inactive-companies": {
+            "get": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Get All inactive companies.Permission required = company.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "8088b471bd1a9547b2bab30fdd8a2e56",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/company/{id}": {
+            "get": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "GET The company.Permission required = company.edit",
+                "description": "This endpoint Gives a specific  company.",
+                "operationId": "4122814bce2f00edb5ae2e12d507621f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the company ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Delete The company.Permission required = company.delete",
+                "description": "This endpoint delete company.",
+                "operationId": "1d8da55acd8c8866baae017c135731a8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the company to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/company/{company}": {
+            "post": {
+                "tags": [
+                    "Company"
+                ],
+                "summary": "Update the company.Permission required = company.update",
+                "description": "This endpoint updates a company.",
+                "operationId": "7551e34b8747f65817c021be48f064fd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the company to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the company",
+                                        "type": "string",
+                                        "example": "Acme Inc."
+                                    },
+                                    "address": {
+                                        "description": "The address of the company",
+                                        "type": "string",
+                                        "example": "123 Main St, Anytown, CA"
+                                    },
+                                    "status": {
+                                        "description": "The status of the company",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "city": {
+                                        "description": "The city of the company",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "country": {
+                                        "description": "The country of the company",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "state": {
+                                        "description": "The state of the company =>nullable",
+                                        "type": "string",
+                                        "example": "state"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the company =>nullable",
+                                        "type": "number",
+                                        "example": "12345"
+                                    },
+                                    "registration_no": {
+                                        "description": "The registration_no of the company =>nullable",
+                                        "type": "number",
+                                        "example": "12345"
+                                    },
+                                    "note": {
+                                        "description": "The notes for the company =>nullable",
+                                        "type": "string",
+                                        "example": "abc"
+                                    },
+                                    "branch": {
+                                        "description": "The branch of the company =>nullable",
+                                        "type": "string",
+                                        "example": "lahore branch"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phone_no of the company=>nullable",
+                                        "type": "number",
+                                        "example": "03452987687"
+                                    },
+                                    "document_media_id": {
+                                        "description": "The document_media of the company=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "logo_media_id": {
+                                        "description": "The logo_media of the company=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Company updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get the tenant report.Permission required = dashboard.list",
+                "description": "This endpoint retrieves all the companies and their duties.",
+                "operationId": "27f3b4fc2e7ae5342d19f8d1eae707cc",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/designation": {
+            "get": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "Get All designations.Permission required = designation.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "6cfbb9d7c27f0a43a57a2806f19ddfd9",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "Create a new designation.Permission required = designation.store",
+                "description": "This endpoint creates a new designation.",
+                "operationId": "961b7d0f5737fd844911a2cc36aa95a4",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The title of the plan => required",
+                                        "type": "string",
+                                        "example": "Monthly Plan"
+                                    },
+                                    "price": {
+                                        "description": "The price of the plan => required",
+                                        "type": "string",
+                                        "example": "10000 PKR"
+                                    },
+                                    "discounted_price": {
+                                        "description": "The discounted_price of the plan => nullable",
+                                        "type": "string",
+                                        "example": "10000 PKR"
+                                    },
+                                    "description": {
+                                        "description": "The description of the plan => nullable",
+                                        "type": "string",
+                                        "example": "Any description related to plan"
+                                    },
+                                    "status": {
+                                        "description": "The status of the designation =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "designation created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/designation/inactive-designations": {
+            "get": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "Get All designations.Permission required = designation.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "3d8b43d9c52600338a568efac4091dbb",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/designation/{id}": {
+            "get": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "GET The designation.Permission required = designation.edit",
+                "description": "This endpoint Gives a specific  designation.",
+                "operationId": "63d1e461f093b0c2779a4e97d0c278fb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the designation ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "Delete The designation.Permission required = designation.delete",
+                "description": "This endpoint delete designation.",
+                "operationId": "4c2a10e9e2a234ef8339b57b76393aa4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the designation to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Designation"
+                ],
+                "summary": "Update the designation.Permission required = designation.update",
+                "description": "This endpoint updates a designation.",
+                "operationId": "5c995ae36a212ee2dfc68b896ad08164",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the designation to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The title of the plan => required",
+                                        "type": "string",
+                                        "example": "Monthly Plan"
+                                    },
+                                    "price": {
+                                        "description": "The price of the plan => required",
+                                        "type": "string",
+                                        "example": "10000 PKR"
+                                    },
+                                    "discounted_price": {
+                                        "description": "The discounted_price of the plan => nullable",
+                                        "type": "string",
+                                        "example": "10000 PKR"
+                                    },
+                                    "description": {
+                                        "description": "The description of the plan => nullable",
+                                        "type": "string",
+                                        "example": "Any description related to plan"
+                                    },
+                                    "status": {
+                                        "description": "The status of the designation =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "designation created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/duty": {
+            "get": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Get All active duties.Permission required = duty.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "123aabee54ef0146b2cf403200478ccd",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Create a new duty.Permission required = duty.store",
+                "description": "This endpoint creates a new duty.",
+                "operationId": "359d2727a06e666ec7fb15685567d158",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The employee_id of the duty => required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "company_id": {
+                                        "description": "The company_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "policy_id": {
+                                        "description": "The policy_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "note": {
+                                        "description": "The note of the duty =>nullable",
+                                        "type": "string",
+                                        "example": "This duty is assigned to this duty"
+                                    },
+                                    "joining_date": {
+                                        "description": "The joining_date of the duty =>nullable",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-11"
+                                    },
+                                    "status": {
+                                        "description": "The status of the duty =>required",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "equipment_ids": {
+                                        "description": "Give the ids of the equipments selected by the user using the checkboxes and please return the ids in a string seprated by commas =>required",
+                                        "type": "string",
+                                        "example": "1,2,3"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "duty created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/duty/inactive-duties": {
+            "get": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Get All inactive duties.Permission required = duty.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "429c407d1f20e8165a9cc9848f929fd9",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/duty/create": {
+            "get": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Show the form for creating the new duty with the given data.Permission required = duty.create ",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "376210eee3f4518a93822d2831114d6d",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/duty/{id}": {
+            "get": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "GET The duty.Permission required = duty.edit",
+                "description": "This endpoint Gives a specific  duty.",
+                "operationId": "0c31795186c888a340f452fd37305a17",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the duty ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Delete The duty.Permission required = duty.delete",
+                "description": "This endpoint delete duty.",
+                "operationId": "a931a5c685974ec7d95305ad6bc4d8f0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the duty to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "Update the duty.Permission required = duty.update",
+                "description": "This endpoint updates a duty.",
+                "operationId": "afc7c1c8dce44992c0448ac0aca3b898",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the duty to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The employee_id of the duty => required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "company_id": {
+                                        "description": "The company_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "policy_id": {
+                                        "description": "The policy_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "note": {
+                                        "description": "The note of the duty =>nullable",
+                                        "type": "string",
+                                        "example": "This duty is assigned to this duty"
+                                    },
+                                    "joining_date": {
+                                        "description": "The joining_date of the duty =>nullable",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-11"
+                                    },
+                                    "status": {
+                                        "description": "The status of the duty =>required",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "equipment_ids": {
+                                        "description": "Give the ids of the equipments selected by the user using the checkboxes and please return the ids in a string seprated by commas =>required",
+                                        "type": "string",
+                                        "example": "1,2,3"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "duty created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/duty/GetEmployee": {
+            "post": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "GET The Employee.Permission required = duty.store",
+                "description": "This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
+                "operationId": "3a9e4baaf7feff644988c7c3ea3f9646",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "emirates_id": {
+                                        "description": "The emirates_id of the duty (required)",
+                                        "type": "number",
+                                        "example": "12121211212"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/duty/search-employee": {
+            "post": {
+                "tags": [
+                    "Duty"
+                ],
+                "summary": "GET The Employee.Permission required = duty.store",
+                "description": "This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
+                "operationId": "2bef3140051b52fca22adf4e7e8a0939",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "searchdata": {
+                                        "description": "The emirates_id or the name  of the employee (required)",
+                                        "type": "string",
+                                        "example": "anas or 1212"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/employee": {
+            "get": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get All active employees.Permission required = employee.list",
+                "description": "This endpoint retrieves all  employees.",
+                "operationId": "00f24070078063b4ddae1072db567609",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Create a new employee.Permission required = employee.store",
+                "description": "This endpoint creates a new employee.",
+                "operationId": "2c841e8772b18179c4389f9c3afd3528",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the employee =>required",
+                                        "type": "string",
+                                        "example": "New Employee"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phon3_no of the employee => required",
+                                        "type": "number",
+                                        "example": "0332322112"
+                                    },
+                                    "gender": {
+                                        "description": "The gender of the employee => required",
+                                        "type": "checkbox",
+                                        "example": "male"
+                                    },
+                                    "emirates_id": {
+                                        "description": "The emirates_id of the employee => required",
+                                        "type": "number",
+                                        "example": "1212121211211"
+                                    },
+                                    "permanent_address": {
+                                        "description": "The permanent_address of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore 123 street "
+                                    },
+                                    "local_address": {
+                                        "description": "The local_address of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore 123 street "
+                                    },
+                                    "nationality": {
+                                        "description": "The nationality of the employee =>required",
+                                        "type": "strign",
+                                        "example": "Pakistan"
+                                    },
+                                    "city": {
+                                        "description": "The city of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "acount_title": {
+                                        "description": "The acount_title of the employee=>required",
+                                        "type": "string",
+                                        "example": "M Anas Shakoor"
+                                    },
+                                    "acount_no": {
+                                        "description": "The acount_no of the employee =>required",
+                                        "type": "number",
+                                        "example": "12121212121"
+                                    },
+                                    "bank_name": {
+                                        "description": "The bank_name for the employee =>required",
+                                        "type": "string",
+                                        "example": "abc"
+                                    },
+                                    "branch_name": {
+                                        "description": "The branch_name of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore branch"
+                                    },
+                                    "status": {
+                                        "description": "The status of the employee=>nullable",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "email": {
+                                        "description": "The emial of the employee=>required",
+                                        "type": "email",
+                                        "example": "abc@gmail.com"
+                                    },
+                                    "state": {
+                                        "description": "The state of the employee=>nullable",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the employee=>nullable",
+                                        "type": "number",
+                                        "example": "12121212"
+                                    },
+                                    "designation_id": {
+                                        "description": "The designation of the employee=>nullable",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "profile_image_id": {
+                                        "description": "The profile_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "passport_image_id": {
+                                        "description": "The passport_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "emirates_image_id": {
+                                        "description": "The emirates_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "resume_image_id": {
+                                        "description": "The resume_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "employee updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/employee/inactive-employees": {
+            "get": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get All Inactive employees.Permission required = employee.list",
+                "description": "This endpoint retrieves all  employees.",
+                "operationId": "859b1904b00f861eb63373fac08fafed",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/employee/create": {
+            "get": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get All designation.Permission required = employee.create",
+                "description": "This endpoint retrieves all  designation related to this logged in tenant.",
+                "operationId": "51582160b0e3ea866867db8e803f8b3a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/employee/{id}": {
+            "get": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "GET The Employee.Permission required = employee.edit",
+                "description": "This endpoint Gives a specific  Employee.",
+                "operationId": "7ef475a66ade2ad4451b452b15a8b5a6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the Employee ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Delete The Employee.Permission required = employee.delete",
+                "description": "This endpoint deletes Employee.",
+                "operationId": "a0d1968119936f99cadc8e5219b58db4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the Employee to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/employee/{employee}": {
+            "post": {
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Update the employee.Permission required = employee.update",
+                "description": "This endpoint updates a employee.",
+                "operationId": "50bde0c208bc1469bdbf8a79ba24ccd4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the employee to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the employee =>required",
+                                        "type": "string",
+                                        "example": "New Employee"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phon3_no of the employee => required",
+                                        "type": "number",
+                                        "example": "0332322112"
+                                    },
+                                    "gender": {
+                                        "description": "The gender of the employee => required",
+                                        "type": "checkbox",
+                                        "example": "male"
+                                    },
+                                    "emirates_id": {
+                                        "description": "The emirates_id of the employee => required",
+                                        "type": "number",
+                                        "example": "1212121211211"
+                                    },
+                                    "permanent_address": {
+                                        "description": "The permanent_address of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore 123 street "
+                                    },
+                                    "local_address": {
+                                        "description": "The local_address of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore 123 street "
+                                    },
+                                    "nationality": {
+                                        "description": "The nationality of the employee =>required",
+                                        "type": "strign",
+                                        "example": "Pakistan"
+                                    },
+                                    "city": {
+                                        "description": "The city of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "acount_title": {
+                                        "description": "The acount_title of the employee=>required",
+                                        "type": "string",
+                                        "example": "M Anas Shakoor"
+                                    },
+                                    "acount_no": {
+                                        "description": "The acount_no of the employee =>required",
+                                        "type": "number",
+                                        "example": "12121212121"
+                                    },
+                                    "bank_name": {
+                                        "description": "The bank_name for the employee =>required",
+                                        "type": "string",
+                                        "example": "abc"
+                                    },
+                                    "branch_name": {
+                                        "description": "The branch_name of the employee =>required",
+                                        "type": "string",
+                                        "example": "lahore branch"
+                                    },
+                                    "status": {
+                                        "description": "The status of the employee=>nullable",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "state": {
+                                        "description": "The state of the employee=>nullable",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the employee=>nullable",
+                                        "type": "number",
+                                        "example": "12121212"
+                                    },
+                                    "designation_id": {
+                                        "description": "The designation of the employee=>nullable",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "profile_image_id": {
+                                        "description": "The profile_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "passport_image_id": {
+                                        "description": "The passport_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "emirates_image_id": {
+                                        "description": "The emirates_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "resume_image_id": {
+                                        "description": "The resume_image of the employee=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "employee updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/employee-transfer": {
+            "get": {
+                "tags": [
+                    "Employee Transfer"
+                ],
+                "summary": "Get All employee transfers.Permission required = employee-transfer.list",
+                "description": "This endpoint retrieves information about employee transfers.",
+                "operationId": "38ecdb94776ef5df06b53efe8ec06888",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/employee-transfer/{previous_duty}": {
+            "post": {
+                "tags": [
+                    "Employee Transfer"
+                ],
+                "summary": "Create a new employee transfer.Permission required = employee-transfer.store",
+                "description": "This endpoint creates a new employee transfer.",
+                "operationId": "ec3747e4f86be0db5f9715c79166c309",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the duty to be transfered",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The employee_id of the duty => required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "company_id": {
+                                        "description": "The company_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "policy_id": {
+                                        "description": "The policy_id of the duty =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "note": {
+                                        "description": "The note of the duty =>nullable",
+                                        "type": "string",
+                                        "example": "This duty is assigned to this duty"
+                                    },
+                                    "joining_date": {
+                                        "description": "The joining_date of the duty =>nullable",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-11-11"
+                                    },
+                                    "status": {
+                                        "description": "The status of the duty =>required",
+                                        "type": "string",
+                                        "example": "1"
+                                    },
+                                    "equipment_ids": {
+                                        "description": "Give the ids of the equipments selected by the user using the checkboxes and please return the ids in a string seprated by commas =>required",
+                                        "type": "string",
+                                        "example": "1,2,3"
+                                    },
+                                    "reason": {
+                                        "description": "The reson why duty was transfered =>nullable ,frontend",
+                                        "type": "text",
+                                        "example": "The duty contract was ended"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "duty created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/employee-transfer/{duty}": {
+            "get": {
+                "tags": [
+                    "Employee Transfer"
+                ],
+                "summary": "GET The transfer form.Permission required = employee-transfer.store",
+                "description": "This endpoint Gives a specific  duty.",
+                "operationId": "00f780cbe8421be6c65b85043f546415",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the duty to be transfered ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/equipment": {
+            "get": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "Get All active equipments.Permission required = equipment.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "2c44a71ff45eecd201cdcff51b2ba254",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "Create a new equipment.Permission required = equipment.store",
+                "description": "This endpoint creates a new equipment.",
+                "operationId": "1ad80519d8ce98f958195b6e87cd95c6",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The name of the equipment => required",
+                                        "type": "string",
+                                        "example": "gun"
+                                    },
+                                    "status": {
+                                        "description": "The status of the equipment =>required",
+                                        "type": "string",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "equipment created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/equipment/inactive-equipments": {
+            "get": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "Get All inactive equipments.Permission required = equipment.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "127ae4a41d42666b9e29532ddaf1dc3c",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/equipment/{id}": {
+            "get": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "GET The equipment.Permission required = equipment.edit",
+                "description": "This endpoint Gives a specific  equipment.",
+                "operationId": "faf3b9e534573c63c8cfe9244ad05234",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the equipment ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "Delete The equipment.Permission required = equipment.delete",
+                "description": "This endpoint delete equipment.",
+                "operationId": "20db7db0d4d1ad4195f1a893d4d6036a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the equipment to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Equipment"
+                ],
+                "summary": "Update the equipment.Permission required = equipment.update",
+                "description": "This endpoint updates a equipment.",
+                "operationId": "dca260a92651ce3f499e9315503f2845",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the equipment to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The name of the equipment => required",
+                                        "type": "string",
+                                        "example": "gun"
+                                    },
+                                    "status": {
+                                        "description": "The status of the equipment =>required",
+                                        "type": "string",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "equipment updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/holiday": {
+            "get": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Get All active holidays.Permission required = holiday.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "7d775d602c5fa06f3577175f055a4f2a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Create a new holiday.Permission required = holiday.update",
+                "description": "This endpoint creates a new holiday.",
+                "operationId": "32257f6c7348be4211c8eaa0f66dd50a",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "company_id": {
+                                        "description": "The id of the company=> required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "status": {
+                                        "description": "The status of the holiday =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "name": {
+                                        "description": "The name of the holiday =>required",
+                                        "type": "string",
+                                        "example": "Eid holiday"
+                                    },
+                                    "starting_date": {
+                                        "description": "The starting_date of the holiday =>required and it format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    },
+                                    "ending_date": {
+                                        "description": "The ending_date of the holiday =>required and it format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "holiday created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/holiday/inactive-holidays": {
+            "get": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Get All inactive holidays.Permission required = holiday.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "e106a5fdd1e35ab8a0c5353c33e17310",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/holiday/create": {
+            "get": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Get All companies that are active.Permission required = holiday.create",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "ae362cdffab3cc9a4e5d42d03dceed0f",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/holiday/{id}": {
+            "get": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "GET The holiday.Permission required = holiday.edit",
+                "description": "This endpoint Gives a specific  holiday.",
+                "operationId": "ac48a8058ed86dc74abc3ce76be6e693",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the holiday ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Delete The holiday.Permission required = holiday.delete",
+                "description": "This endpoint delete holiday.",
+                "operationId": "0d5168069d30785fe8129a37154614c0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the holiday to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Holiday"
+                ],
+                "summary": "Update the holiday.Permission required = holiday.update",
+                "description": "This endpoint updates a holiday.",
+                "operationId": "49b6436ae5246f4b4a90fc667f77c283",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the holiday to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "company_id": {
+                                        "description": "The id of the company=> required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "status": {
+                                        "description": "The status of the holiday =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "name": {
+                                        "description": "The name of the holiday =>required",
+                                        "type": "string",
+                                        "example": "Eid holiday"
+                                    },
+                                    "starting_date": {
+                                        "description": "The starting_date of the holiday =>required and it format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    },
+                                    "ending_date": {
+                                        "description": "The ending_date of the holiday =>required and it format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-23"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "holiday created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/permission": {
+            "get": {
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Get All permissions.Permission required = permission.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "4b8e3995891729ea0e6debd378e5e2f1",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Create a new permission.Permission required = permission.store",
+                "description": "This endpoint creates a new permission.",
+                "operationId": "f26c653915ef914f46a28d96835c9e90",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the permission => required",
+                                        "type": "string",
+                                        "example": "module.delete"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "permission created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/permission/{id}": {
+            "get": {
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "GET The permission.Permission required = permission.edit",
+                "description": "This endpoint Gives a specific  permission.",
+                "operationId": "3b90a781d1da8c1e9a58874c17529268",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the permission ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Delete The permission.Permission required = permission.delete",
+                "description": "This endpoint delete permission.",
+                "operationId": "090078b69bb522f6a6be7ff31b8401ba",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the permission to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Permission"
+                ],
+                "summary": "Update the permission.Permission required = permission.update",
+                "description": "This endpoint updates a permission.",
+                "operationId": "7f3118bdad4061ed84641fb66d2bba5f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the permission to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the permission => required",
+                                        "type": "string",
+                                        "example": "module.example"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "permission updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/policy": {
+            "get": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "Get All active policies.Permission required = policy.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "258036396b1683d07da4bb3afee35821",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "Create a new policy.Permission required = policy.store",
+                "description": "This endpoint creates a new policy.",
+                "operationId": "f3e87404d6207ebf7bd22c8c2dfe13f8",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the policy => required",
+                                        "type": "string",
+                                        "example": "new policy"
+                                    },
+                                    "shift_start": {
+                                        "description": "The shift_start timing  of the policy => required",
+                                        "type": "string",
+                                        "example": "10:00 AM"
+                                    },
+                                    "shift_end": {
+                                        "description": "The shift_end timing  of the policy => required",
+                                        "type": "string",
+                                        "example": "10:00 AM"
+                                    },
+                                    "late_allow": {
+                                        "description": " => required",
+                                        "type": "string",
+                                        "example": "10 min"
+                                    },
+                                    "early_departure_allow": {
+                                        "description": "=> required",
+                                        "type": "string",
+                                        "example": "15 min"
+                                    },
+                                    "late_deduction": {
+                                        "description": "The amount to be deducted when employee is late =>required",
+                                        "type": "string",
+                                        "example": "100 AED"
+                                    },
+                                    "early_deduction": {
+                                        "description": " =>required",
+                                        "type": "string",
+                                        "example": "100 AED"
+                                    },
+                                    "status": {
+                                        "description": "The status of the policy =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "policy created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/policy/inactive-policies": {
+            "get": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "Get All active policies.Permission required = policy.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "6dc8b510bf20ab6f968cadd34c84236b",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/policy/{id}": {
+            "get": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "GET The policy.Permission required = policy.edit",
+                "description": "This endpoint Gives a specific  policy.",
+                "operationId": "a7abd5b786e60ac8be8eb6191c39e7d7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the policy ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "Delete The policy.Permission required = policy.delete",
+                "description": "This endpoint delete policy.",
+                "operationId": "dd0c3ededafc2bf83d6af31eadb1a57b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the policy to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Policy"
+                ],
+                "summary": "Update the policy.Permission required = policy.update",
+                "description": "This endpoint updates a policy.",
+                "operationId": "2f0876b1b7edfb481320718d8a151348",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the policy to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the policy => required",
+                                        "type": "string",
+                                        "example": "new policy"
+                                    },
+                                    "shift_start": {
+                                        "description": "The shift_start timing  of the policy => required",
+                                        "type": "string",
+                                        "example": "10:00 AM"
+                                    },
+                                    "shift_end": {
+                                        "description": "The shift_end timing  of the policy => required",
+                                        "type": "string",
+                                        "example": "10:00 AM"
+                                    },
+                                    "late_allow": {
+                                        "description": " => required",
+                                        "type": "string",
+                                        "example": "10 min"
+                                    },
+                                    "early_departure_allow": {
+                                        "description": "=> required",
+                                        "type": "string",
+                                        "example": "15 min"
+                                    },
+                                    "late_deduction": {
+                                        "description": "The amount to be deducted when employee is late =>required",
+                                        "type": "string",
+                                        "example": "100 AED"
+                                    },
+                                    "early_deduction": {
+                                        "description": " =>required",
+                                        "type": "string",
+                                        "example": "100 AED"
+                                    },
+                                    "status": {
+                                        "description": "The status of the policy =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "policy created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Authenticate user and generate JWT token",
+                "operationId": "82029854b7191d64582592c46e594dfd",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "User's email",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "description": "User's password",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/resignation": {
+            "get": {
+                "tags": [
+                    "Resignation"
+                ],
+                "summary": "Get All active resignations.Permission required = resignation.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "93876d6416c7c6ab41e472da845cc344",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Resignation"
+                ],
+                "summary": "Create a new resignation.Permission required = resignation.store",
+                "description": "This endpoint creates a new resignation.",
+                "operationId": "d525155fd1c791eac3b68101a5f30f5d",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "employee_id": {
+                                        "description": "The employee_id of the employee needed to be resigned => required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "reason": {
+                                        "description": "The reason of the resignation =>nullable",
+                                        "type": "text",
+                                        "example": "This is my reason"
+                                    },
+                                    "equipment_status": {
+                                        "description": " nullable",
+                                        "type": "string",
+                                        "example": "ok"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "resignation created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/resignation/inactive-resignations": {
+            "get": {
+                "tags": [
+                    "Resignation"
+                ],
+                "summary": "Get inactive All resignations.Permission required = resignation.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "ff567e289be53510979d9d165ee5951c",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/resignation/get-employee": {
+            "post": {
+                "tags": [
+                    "Resignation"
+                ],
+                "summary": "GET The Employee.Permission required = resignation.store",
+                "description": "This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
+                "operationId": "a0e2bc2ce5d71eeaffb7c93b44bcc9f1",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "emirates_id": {
+                                        "description": "The emirates_id of the employee (required)",
+                                        "type": "number",
+                                        "example": "12121211212"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/resignation/{id}": {
+            "delete": {
+                "tags": [
+                    "Resignation"
+                ],
+                "summary": "Delete The resignation.Permission required = resignation.delete",
+                "description": "This endpoint delete resignation.",
+                "operationId": "0195658050e4d2d4b52b33b61b54accb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the resignation to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/role": {
+            "get": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Get All roles.Permission required = role.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "d62852a67320a1ebf3804db58dabc321",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Create a new role.Permission required = role.store",
+                "description": "This endpoint creates a new role.",
+                "operationId": "0dd608cfbf0e190dc52461d237598403",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the role => required",
+                                        "type": "string",
+                                        "example": "newrole"
+                                    },
+                                    "permissions": {
+                                        "description": "The The permission needed to be assigned to   the role =>required",
+                                        "type": "string",
+                                        "example": "company.create,company.update"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "role created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/role/create": {
+            "get": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Get All permissions.Permission required = role.create",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "139c4d2f249433b2dff20fbc9ef3275b",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/role/{id}": {
+            "get": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "GET The role.Permission required = role.edit",
+                "description": "This endpoint Gives a specific  role.",
+                "operationId": "6bb03c2c963fdece54d7dd92e02c7ae4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the role ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Delete The role.Permission required = role.delete",
+                "description": "This endpoint delete role.",
+                "operationId": "a7b4cbb3b6b02b85bdf596dc73775f78",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the role to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Role"
+                ],
+                "summary": "Update the role.Permission required = role.update",
+                "description": "This endpoint updates a role.",
+                "operationId": "a5276b53d2edc67745fbfa724e0b0dd9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the role to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the role => required",
+                                        "type": "string",
+                                        "example": "newrole"
+                                    },
+                                    "permissions": {
+                                        "description": "The The permission needed to be assigned to   the role =>required",
+                                        "type": "string",
+                                        "example": "company.create,company.update"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "role created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/subscriber": {
+            "get": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Get All subscribers.Permission required = subscriber.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "1de97ff2fcf6d9f26c8f614bf1176134",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Create a new subscriber.Permission required = subscriber.store",
+                "description": "This endpoint creates a new subscriber.",
+                "operationId": "cf7efcfbae40c18a9096ae20727a789b",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "tenant_id": {
+                                        "description": "The id of the tenant => required",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "subscription_plan_id": {
+                                        "description": "The id of the subscription_plan => required",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "start_date": {
+                                        "description": "The starting date of plan=> required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-03-25"
+                                    },
+                                    "end_date": {
+                                        "description": "The ending date of plan=> required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-03-25"
+                                    },
+                                    "amount": {
+                                        "description": "The amount of plan=> required",
+                                        "type": "string",
+                                        "example": "100 PKR"
+                                    },
+                                    "status": {
+                                        "description": "The status of the subscriber =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "subscriber created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/subscriber/inactive-subscribers": {
+            "get": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Get All subscribers.Permission required = subscriber.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "6bdd10ff2890b8c4e804326704339970",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/subscriber/create": {
+            "get": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Get All companies that are active.Permission required = subscriber.create",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "b95f694801449599c298d4ee38e704fa",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/subscriber/{id}": {
+            "get": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "GET The subscriber.Permission required = subscriber.edit",
+                "description": "This endpoint Gives a specific  subscriber.",
+                "operationId": "35af6f135c36ecdd1b7a9d95d9118300",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscriber ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Delete The subscriber.Permission required = subscriber.delete",
+                "description": "This endpoint delete subscriber.",
+                "operationId": "5c3c3bac17db4422cdf5a260be8ebeb0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscriber to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Subscriber"
+                ],
+                "summary": "Update the subscriber.Permission required = subscriber.update",
+                "description": "This endpoint updates a subscriber.",
+                "operationId": "c45a1856bd08e689a258f51551720dfa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscriber to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "tenant_id": {
+                                        "description": "The id of the tenant => required",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "subscription_plan_id": {
+                                        "description": "The id of the subscription_plan => required",
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "start_date": {
+                                        "description": "The starting date of plan=> required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-03-25"
+                                    },
+                                    "end_date": {
+                                        "description": "The ending date of plan=> required and its format should be yyyy-mm-dd",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-03-25"
+                                    },
+                                    "amount": {
+                                        "description": "The amount of plan=> required",
+                                        "type": "string",
+                                        "example": "100 PKR"
+                                    },
+                                    "status": {
+                                        "description": "The status of the subscriber =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "subscriber created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/subscrition-plan": {
+            "get": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "Get All subscrition plans.Permission required = subscrition_plan.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "6ecae80dd784e3804ba2ec6a17297ec5",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "Create a new subscrition plan.Permission required = subscrition_plan.store",
+                "description": "This endpoint creates a new subscrition plan.",
+                "operationId": "991338cbc330e227b5b8325e123356f4",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The name of the subscrition plan => required",
+                                        "type": "string",
+                                        "example": "newsubscrition plan"
+                                    },
+                                    "status": {
+                                        "description": "The status of the subscrition plan =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "subscrition plan created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/subscrition-plan/inactive-subscrition plans": {
+            "get": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "Get All subscrition plans.Permission required = subscrition_plan.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "44063fc70e20682d1295f63f97658b2a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/subscrition-plan/{id}": {
+            "get": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "GET The subscrition plan.Permission required = subscrition_plan.edit",
+                "description": "This endpoint Gives a specific  subscrition plan.",
+                "operationId": "9e567add434e009da25247f2abcb6f22",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscrition plan ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "Delete The subscrition plan.Permission required = subscrition_plan.delete",
+                "description": "This endpoint delete subscrition plan.",
+                "operationId": "5ea2ce7da9fe54c46c07b9c46448ad2c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscrition plan to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Subscrition Plan"
+                ],
+                "summary": "Update the subscrition plan.Permission required = subscrition_plan.update",
+                "description": "This endpoint updates a subscrition plan.",
+                "operationId": "0f836187ea87833b2f9b0ec19c2999aa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the subscrition plan to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "The name of the subscrition plan => required",
+                                        "type": "string",
+                                        "example": "newsubscrition plan"
+                                    },
+                                    "status": {
+                                        "description": "The status of the subscrition plan =>required",
+                                        "type": "status",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "subscrition plan updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/tenant": {
+            "get": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Get All active tenants.Permission required = tenant.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "2b8a16539ea871c8e5ca3bd69e4d2aee",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Create a new tenant.Permission required = tenant.store",
+                "description": "This endpoint creates a new tenant.",
+                "operationId": "c1d9a658ee9c44a02f17931eb15a73bd",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the tenant => required",
+                                        "type": "string",
+                                        "example": "newtenant"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phone_no of the tenant => required",
+                                        "type": "number",
+                                        "example": "03245678967"
+                                    },
+                                    "website": {
+                                        "description": "The website of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "www.mywebsite.com"
+                                    },
+                                    "address": {
+                                        "description": "The address of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "E 73، E1 Hali Rd, Block E1 Block E 1 Gulberg III, Lahore, Punjab 54000, <Pakistan></Pakistan>"
+                                    },
+                                    "city": {
+                                        "description": "The city of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "state": {
+                                        "description": "The state of the tenant =>nullable",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the tenant =>nullable",
+                                        "type": "number",
+                                        "example": "11111111"
+                                    },
+                                    "country": {
+                                        "description": "The country of the tenant =>required",
+                                        "type": "string",
+                                        "example": "India"
+                                    },
+                                    "status": {
+                                        "description": "The status of the tenant =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "document_media_id": {
+                                        "description": "The document_media of the tenant=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "logo_media_id": {
+                                        "description": "The logo_media of the tenant=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "tenant created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/tenant/inactive-tenants": {
+            "get": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Get All inactive tenants.Permission required = tenant.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "a2747a7392fbb937229770b4105182d2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/tenant/{id}": {
+            "get": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "GET The tenant.Permission required = tenant.edit",
+                "description": "This endpoint Gives a specific  tenant.",
+                "operationId": "117528f2337686fdb508a64c24057ee4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the tenant ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Delete The tenant.Permission required = tenant.delete",
+                "description": "This endpoint delete tenant.",
+                "operationId": "97bfce1d521acd2c0bf74f97c4958e85",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the tenant to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/tenant/{tenant}": {
+            "post": {
+                "tags": [
+                    "Tenant"
+                ],
+                "summary": "Update the tenant.Permission required = tenant.update",
+                "description": "This endpoint updates a tenant.",
+                "operationId": "f072a5c99ede52e02cdc299bbd6b20bb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the tenant to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "The name of the tenant => required",
+                                        "type": "string",
+                                        "example": "newtenant"
+                                    },
+                                    "phone_no": {
+                                        "description": "The phone_no of the tenant => required",
+                                        "type": "number",
+                                        "example": "03245678967"
+                                    },
+                                    "website": {
+                                        "description": "The website of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "www.mywebsite.com"
+                                    },
+                                    "address": {
+                                        "description": "The address of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "E 73، E1 Hali Rd, Block E1 Block E 1 Gulberg III, Lahore, Punjab 54000, <Pakistan></Pakistan>"
+                                    },
+                                    "city": {
+                                        "description": "The city of the tenant => nullable",
+                                        "type": "string",
+                                        "example": "lahore"
+                                    },
+                                    "state": {
+                                        "description": "The state of the tenant =>nullable",
+                                        "type": "string",
+                                        "example": "pakistan"
+                                    },
+                                    "zip_code": {
+                                        "description": "The zip_code of the tenant =>nullable",
+                                        "type": "number",
+                                        "example": "11111111"
+                                    },
+                                    "country": {
+                                        "description": "The country of the tenant =>required",
+                                        "type": "string",
+                                        "example": "India"
+                                    },
+                                    "status": {
+                                        "description": "The status of the tenant =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    },
+                                    "document_media_id": {
+                                        "description": "The document_media of the tenant=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    },
+                                    "logo_media_id": {
+                                        "description": "The logo_media of the tenant=>nullable",
+                                        "type": "file",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "tenant created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/get-company-report/{id}": {
+            "get": {
+                "tags": [
+                    "Company Report"
+                ],
+                "summary": "Get the company report.Permission required = company-report.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "4bdfc1e26d9c946691f11c881f845ad3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id of the company against which you need the report",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/company-report/create": {
+            "get": {
+                "tags": [
+                    "Company Report"
+                ],
+                "summary": "Get All companies.Permission required = company-report.list",
+                "description": "This endpoint retrieves all  companies related to this logged in tenant.",
+                "operationId": "b88a6dedc94ef687d23ce32b40f73e2a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get All  active users.Permission required = user.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "fe9992e1e7e6e2d260628b2dbd89ef72",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create a new user.Permission required = user.store",
+                "description": "This endpoint creates a new user.",
+                "operationId": "fc08eefb68aa5f66a3af0600c29866d9",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "description": "The email of the user => required",
+                                        "type": "email",
+                                        "example": "example@gmail.com"
+                                    },
+                                    "password": {
+                                        "description": "The password of the user => required",
+                                        "type": "password",
+                                        "example": "password"
+                                    },
+                                    "role": {
+                                        "description": "The role of the user => required",
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "status": {
+                                        "description": "The status of the user =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "user created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/user/inactive-users": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get All inactive users.Permission required = user.list",
+                "description": "This endpoint retrieves information about something.",
+                "operationId": "451f0d7887088ec5610cc93f5c7c6fe4",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/user/create": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get All roles.Permission required = user.create",
+                "description": "This endpoint retrieves all  roles .",
+                "operationId": "4b50c7875ed442ac9af953767c70fb8a",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/user/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "GET The user.Permission required = user.edit",
+                "description": "This endpoint Gives a specific  user.",
+                "operationId": "89c8ebaf632ccdadf9afd97cbfe5eb8b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the user ",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete The user.Permission required = user.delete",
+                "description": "This endpoint delete user.",
+                "operationId": "c87cdc7655597d3a3e14d69c582bb2eb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the user to be deleted",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update the user.Permission required = user.update",
+                "description": "This endpoint updates a user.",
+                "operationId": "f002ac810703a25a411e0149c3285714",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID of the user to be updated",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "properties": {
+                                    "password": {
+                                        "description": "The password of the user => required",
+                                        "type": "password",
+                                        "example": "password"
+                                    },
+                                    "role": {
+                                        "description": "The role of the user => required",
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "status": {
+                                        "description": "The status of the user =>required",
+                                        "type": "number",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "user created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "Authorization",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Attendance",
+            "description": "Handling the CRUD operations related to attendance."
+        },
+        {
+            "name": "Attendance Report",
+            "description": "Handling the crud of attendance Report in it."
+        },
+        {
+            "name": "Attendance Roster",
+            "description": "Handling the crud of attendance roster in it."
+        },
+        {
+            "name": "Company",
+            "description": "Handling the crud of company in it."
+        },
+        {
+            "name": "Dashboard",
+            "description": "Handles the report of the tenant"
+        },
+        {
+            "name": "Designation",
+            "description": "Handling the crud of designation in it."
+        },
+        {
+            "name": "Duty",
+            "description": "Handling the crud of Duty in it."
+        },
+        {
+            "name": "Employee",
+            "description": "Handling the crud of Employee in it."
+        },
+        {
+            "name": "Employee Transfer"
+        },
+        {
+            "name": "Equipment",
+            "description": "Handling the crud of equipment in it."
+        },
+        {
+            "name": "Holiday",
+            "description": "Handling the crud of holiday in it."
+        },
+        {
+            "name": "Permission",
+            "description": "Handling the crud of Permission in it."
+        },
+        {
+            "name": "Policy",
+            "description": "Handling the crud of Policy in it."
+        },
+        {
+            "name": "Login"
+        },
+        {
+            "name": "Resignation",
+            "description": "Handling the crud of resignation in it."
+        },
+        {
+            "name": "Role",
+            "description": "Handling the crud of Role in it."
+        },
+        {
+            "name": "Subscriber",
+            "description": "Handling the crud of subscriber in it."
+        },
+        {
+            "name": "Subscrition Plan",
+            "description": "Handling the crud of subscrition plan in it."
+        },
+        {
+            "name": "Tenant",
+            "description": "Handling the crud of Tenant in it."
+        },
+        {
+            "name": "Company Report",
+            "description": "Handling the crud of Company Report in it."
+        },
+        {
+            "name": "User",
+            "description": "Handling the crud of User in it."
+        }
+    ],
+    "security": [
+        {
+            "sanctum": []
+        }
+    ]
+}
