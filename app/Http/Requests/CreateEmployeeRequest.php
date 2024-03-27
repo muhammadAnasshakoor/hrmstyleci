@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateEmployeeRequest extends FormRequest
@@ -16,7 +16,6 @@ class CreateEmployeeRequest extends FormRequest
         return true;
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,28 +24,28 @@ class CreateEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'nullable',
-            'tenant_id' => 'nullable',
-            'name' => 'required|string',
-            'phone_no' => 'nullable',
-            'gender' => 'required',
-            'emirates_id' => 'required|numeric',
-            'city' => 'required',
-            'state' => 'nullable',
-            'zip_code' => 'nullable|numeric',
-            'profile_image_id' => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
+            'user_id'           => 'nullable',
+            'tenant_id'         => 'nullable',
+            'name'              => 'required|string',
+            'phone_no'          => 'nullable',
+            'gender'            => 'required',
+            'emirates_id'       => 'required|numeric',
+            'city'              => 'required',
+            'state'             => 'nullable',
+            'zip_code'          => 'nullable|numeric',
+            'profile_image_id'  => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
             'passport_image_id' => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
             'emirates_image_id' => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
-            'resume_image_id' => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
+            'resume_image_id'   => 'nullable|mimes:jpeg,png,gif,svg+xml,image/jpeg,image/pjpeg,image/png,image/gif,pdf,image/webp',
             'permanent_address' => 'required',
-            'local_address' => 'required',
-            'nationality' => 'required',
-            'designation_id' => 'required',
-            'acount_title' => 'required',
-            'acount_no' => 'required|numeric',
-            'bank_name' => 'required',
-            'branch_name' => 'required',
-            'status' => 'nullable|regex:/^[01]$/',
+            'local_address'     => 'required',
+            'nationality'       => 'required',
+            'designation_id'    => 'required',
+            'acount_title'      => 'required',
+            'acount_no'         => 'required|numeric',
+            'bank_name'         => 'required',
+            'branch_name'       => 'required',
+            'status'            => 'nullable|regex:/^[01]$/',
         ];
     }
 
@@ -56,7 +55,7 @@ class CreateEmployeeRequest extends FormRequest
         // for the validation errors
         throw new HttpResponseException(response()->json([
             'message' => 'Validation failed',
-            'errors' => $validator->errors(),
+            'errors'  => $validator->errors(),
         ], 422));
     }
 }

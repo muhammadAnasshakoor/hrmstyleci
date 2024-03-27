@@ -4,9 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
 
 /**
  * @OA\Tag(
@@ -26,12 +25,14 @@ class PermissionController extends Controller
         $this->middleware('checkPermission:permission.update')->only('update');
         $this->middleware('checkPermission:permission.delete')->only('delete');
     }
+
     /**
      * @OA\Get(
      *      path="/api/permission",
      *      summary="Get All permissions.Permission required = permission.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Permission"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -39,16 +40,17 @@ class PermissionController extends Controller
     public function index()
     {
         $permissions = Permission::all();
+
         return response()->json([
-            'message' => 'Retrieved all permissions successfully',
-            'permissions' => $permissions
+            'message'     => 'Retrieved all permissions successfully',
+            'permissions' => $permissions,
 
         ]);
     }
+
     public function create()
     {
     }
-
 
     /**  @OA\Get(
      *      path="/api/permission/{id}",
@@ -61,21 +63,22 @@ class PermissionController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the permission ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function show(Permission $permission)
     {
         return response()->json([
-            'message' => 'Permission details retrieved successfully',
-            'Permission' => $permission
+            'message'    => 'Permission details retrieved successfully',
+            'Permission' => $permission,
         ]);
     }
 
@@ -88,11 +91,15 @@ class PermissionController extends Controller
      *     summary="Create a new permission.Permission required = permission.store",
      *     description="This endpoint creates a new permission.",
      *     tags={"Permission"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -102,20 +109,19 @@ class PermissionController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="permission created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
     public function store(Request $request)
     {
-
         DB::beginTransaction();
-        try {
 
+        try {
             $request->validate([
-                'name' => 'required|string'
+                'name' => 'required|string',
 
             ]);
 
@@ -123,19 +129,18 @@ class PermissionController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Permission has been added successfully',
-                'permission' => $Permission
+                'message'    => 'Permission has been added successfully',
+                'permission' => $Permission,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There  is some error',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ]);
         }
     }
-
-
 
     /**
      * @OA\Patch(
@@ -143,22 +148,28 @@ class PermissionController extends Controller
      *     summary="Update the permission.Permission required = permission.update",
      *     description="This endpoint updates a permission.",
      *     tags={"Permission"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the permission to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -168,31 +179,26 @@ class PermissionController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="200", description="permission updated successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
-
-
-
     public function update(Request $request, Permission $permission)
     {
         DB::beginTransaction();
 
-
         try {
-            $req =   $request->validate([
-                'name' => 'required|string'
+            $req = $request->validate([
+                'name' => 'required|string',
                 // 'name' => 'required|numeric'
             ]);
-
 
             $roles = $permission->roles()->count();
             if ($roles > 0) {
                 return response()->json([
-                    'message' => 'Unable to update permission. It is associated with existing roles.'
+                    'message' => 'Unable to update permission. It is associated with existing roles.',
                 ]);
             }
             $permission->update($req);
@@ -200,18 +206,18 @@ class PermissionController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Permission is updated successfully',
-                'Updated Permission' => $permission
+                'message'            => 'Permission is updated successfully',
+                'Updated Permission' => $permission,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There is some error',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ]);
         }
     }
-
 
     /**
      * @OA\Delete(
@@ -225,42 +231,42 @@ class PermissionController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the permission to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function destroy(Permission $permission)
     {
         DB::beginTransaction();
+
         try {
-
-
-
             $roles = $permission->roles()->count();
             if ($roles > 0) {
                 return response()->json([
-                    'message' => 'Unable to delete permission. It is associated with existing roles.'
+                    'message' => 'Unable to delete permission. It is associated with existing roles.',
                 ]);
             }
             $permission->delete();
 
             DB::commit();
+
             return response()->json([
-                'message' => 'Permission deleted successfully'
+                'message' => 'Permission deleted successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'There was an error deleting the permission',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ]);
         }
     }

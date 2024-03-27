@@ -22,20 +22,24 @@ class Attendance extends Model
         'check_out_location',
         'total_hours',
         'type',
-        'reason'
+        'reason',
     ];
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
+
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
+
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
+
     public function attendanceReport()
     {
         return $this->hasOne(AttendanceReport::class);

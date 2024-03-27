@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Media;
-use App\Models\Designation;
-use Spatie\Permission\Models\Role;
-use App\Models\Employee;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail; // Import Mail facade
-
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateEmployeeRequest;
 use App\Http\Requests\CreateUserRequest;
+use App\Models\Designation;
+use App\Models\Employee;
+use App\Models\Media;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth; // Import Mail facade
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Profiler\Profile;
-
 
 /**
  * @OA\Tag(
@@ -24,9 +22,6 @@ use Symfony\Component\HttpKernel\Profiler\Profile;
  *     description="Handling the crud of Employee in it."
  * )
  */
-
-
-
 class EmployeeController extends Controller
 {
     public function __construct()
@@ -49,12 +44,11 @@ class EmployeeController extends Controller
      *      summary="Get All active employees.Permission required = employee.list",
      *      description="This endpoint retrieves all  employees.",
      *      tags={"Employee"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function index()
     {
         $loggedInUser = auth()->user();
@@ -95,15 +89,12 @@ class EmployeeController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Active Employees and duties retrieved successfully.',
-            'data' => [
+            'data'    => [
                 'employees' => $employees,
-                'duties' => $duties
-            ]
+                'duties'    => $duties,
+            ],
         ], 200);
     }
-
-
-
 
     /**
      * @OA\Get(
@@ -111,12 +102,11 @@ class EmployeeController extends Controller
      *      summary="Get All Inactive employees.Permission required = employee.list",
      *      description="This endpoint retrieves all  employees.",
      *      tags={"Employee"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function inactiveEmployees()
     {
         $loggedInUser = auth()->user();
@@ -157,16 +147,12 @@ class EmployeeController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Inactive Employees and duties retrieved successfully.',
-            'data' => [
+            'data'    => [
                 'employees' => $employees,
-                'duties' => $duties
-            ]
+                'duties'    => $duties,
+            ],
         ], 200);
     }
-
-
-
-
 
     private function handleImages($employee)
     {
@@ -211,7 +197,6 @@ class EmployeeController extends Controller
         }
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -221,6 +206,7 @@ class EmployeeController extends Controller
      *      summary="Get All designation.Permission required = employee.create",
      *      description="This endpoint retrieves all  designation related to this logged in tenant.",
      *      tags={"Employee"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -235,9 +221,10 @@ class EmployeeController extends Controller
             ->where('tenant_id', $loggedInTenantId)
             ->select('id', 'title')
             ->get();
+
         return response()->json([
-            'message' => 'Active designations retrieved successfully',
-            'designation' => $activedesignation
+            'message'     => 'Active designations retrieved successfully',
+            'designation' => $activedesignation,
         ]);
     }
 
@@ -250,26 +237,27 @@ class EmployeeController extends Controller
      *     summary="Create a new employee.Permission required = employee.store",
      *     description="This endpoint creates a new employee.",
      *     tags={"Employee"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                      property="name",
      *                     type="string",
      *                     example="New Employee",
      *                     description="The name of the employee =>required"
      *                 ),
-     *
-     *
      *                 @OA\Property(
      *                     property="phone_no",
      *                     type="number",
      *                     example="0332322112",
      *                     description="The phon3_no of the employee => required"
      *                 ),
-     *
      *                 @OA\Property(
      *                     property="gender",
      *                     type="checkbox",
@@ -354,7 +342,6 @@ class EmployeeController extends Controller
      *                     example="1",
      *                     description="The designation of the employee=>nullable"
      *                 ),
-     *
      *                            @OA\Property(
      *                     property="profile_image_id",
      *                     type="file",
@@ -382,20 +369,19 @@ class EmployeeController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="200", description="employee updated successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
     public function store(CreateEmployeeRequest $employeeRequest, CreateUserRequest $userRequest)
     {
-
         $employeedata = $employeeRequest->validated();
         $userdata = $userRequest->validated();
         DB::beginTransaction();
-        try {
 
+        try {
             // CREATING NEW USER
 
             // assigning the employee status to user
@@ -405,26 +391,24 @@ class EmployeeController extends Controller
             $loggedinuser = auth::user();
             $loggedinuserid = $loggedinuser->id;
             if (isset($userdata['password']) && $userdata['password'] != null) {
-
                 $additionalUserData = [
 
                     'modified_by' => $loggedinuserid,
-                    $password = $userRequest->input('password')
+                    $password = $userRequest->input('password'),
                 ];
             } else {
                 $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?-=[];\',./';
                 $password = substr(str_shuffle($characters), 0, 8);
 
                 $additionalUserData = [
-                    'password' => $password,
-                    'modified_by' => $loggedinuserid
+                    'password'    => $password,
+                    'modified_by' => $loggedinuserid,
                 ];
             }
             $mergedUserData = array_merge($userdata, $additionalUserData);
 
             //finally creating the newuser
             $newuser = User::create($mergedUserData);
-
 
             // handling the media files files
 
@@ -437,12 +421,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the profileimage
                 $profileimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $profileimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $profileimage_name,
                     'media_path' => $profileimagepath,
-                    'extension' => $profileimageextension
+                    'extension'  => $profileimageextension,
                 ]);
-                $employeedata['profile_image_id']  = $profileimagemedia->id;
+                $employeedata['profile_image_id'] = $profileimagemedia->id;
             }
 
             //resume_image
@@ -454,12 +438,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the resumeimage
                 $resumeimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $resumeimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $resumeimage_name,
                     'media_path' => $resumeimagepath,
-                    'extension' => $resumeimageextension
+                    'extension'  => $resumeimageextension,
                 ]);
-                $employeedata['resume_image_id']  = $resumeimagemedia->id;
+                $employeedata['resume_image_id'] = $resumeimagemedia->id;
             }
 
             //passport_image
@@ -471,12 +455,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the passportimage
                 $passportimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $passportimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $passportimage_name,
                     'media_path' => $passportimagepath,
-                    'extension' => $passportimageextension
+                    'extension'  => $passportimageextension,
                 ]);
-                $employeedata['passport_image_id']  = $passportimagemedia->id;
+                $employeedata['passport_image_id'] = $passportimagemedia->id;
             }
 
             //emirates_image
@@ -488,24 +472,22 @@ class EmployeeController extends Controller
 
                 // creating the new media for the emiratesimage
                 $emiratesimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $emiratesimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $emiratesimage_name,
                     'media_path' => $emiratesimagepath,
-                    'extension' => $emiratesimageextension
+                    'extension'  => $emiratesimageextension,
                 ]);
-                $employeedata['emirates_image_id']  = $emiratesimagemedia->id;
+                $employeedata['emirates_image_id'] = $emiratesimagemedia->id;
             }
 
             // CREATING NEW EMPLOYEE
-            $newemployee =  $newuser->employee()->create($employeedata);
+            $newemployee = $newuser->employee()->create($employeedata);
 
             // associating the employee with the tenant
             $tenantaccociated = $loggedinuser->tenant;
             if ($tenantaccociated) {
-
                 $tenantaccociated->employees()->save($newemployee);
             }
-
 
             $employeeRole = Role::where('name', 'employee')->where('guard_name', 'sanctum')->first();
             if (!$employeeRole) {
@@ -513,12 +495,11 @@ class EmployeeController extends Controller
             }
             $newuser->assignRole($employeeRole);
 
-
             // sending the emial to employee with login credentials
             $data = [
-                'name' => $newemployee->name,
-                'email' => $newuser->email,
-                'password' => $password
+                'name'     => $newemployee->name,
+                'email'    => $newuser->email,
+                'password' => $password,
             ];
             $email = $newuser->email;
             Mail::send('emails.LoginCredentials', $data, function ($message) use ($email) {
@@ -528,20 +509,21 @@ class EmployeeController extends Controller
             });
 
             DB::commit();
+
             return response()->json([
-                'message' => 'employee and associated user are created successfully',
+                'message'  => 'employee and associated user are created successfully',
                 'employee' => $newemployee,
-                'user'  => $newuser,
+                'user'     => $newuser,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
-
 
     /**
      * @OA\Get(
@@ -555,27 +537,25 @@ class EmployeeController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the Employee ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function show(string $id)
     {
         $Employee = Employee::with('user:id,email', 'designation:id,title')->findOrFail($id);
         // handling the profile in this case
         $EmployeeProfileid = $Employee->profile_image_id;
         if ($EmployeeProfileid !== null) {
-
             $Profilemedia = Media::where('id', $EmployeeProfileid)->first();
             if ($Profilemedia) {
-
-
                 $Profilemediapathurl = asset("storage/{$Profilemedia->media_path}");
                 $Profilemedia['media_path'] = $Profilemediapathurl;
                 $Employee['profile_image_id'] = $Profilemedia;
@@ -584,11 +564,8 @@ class EmployeeController extends Controller
         // handling the profile in this case
         $Employeeresumeid = $Employee->resume_image_id;
         if ($Employeeresumeid !== null) {
-
             $resumemedia = Media::where('id', $Employeeresumeid)->first();
             if ($resumemedia) {
-
-
                 $resumemediapathurl = asset("storage/{$resumemedia->media_path}");
                 $resumemedia['media_path'] = $resumemediapathurl;
                 $Employee['resume_image_id'] = $resumemedia;
@@ -597,11 +574,8 @@ class EmployeeController extends Controller
         // handling the emirates id in this case
         $Employeeemiratesid = $Employee->emirates_image_id;
         if ($Employeeemiratesid !== null) {
-
             $emiratesmedia = Media::where('id', $Employeeemiratesid)->first();
             if ($emiratesmedia) {
-
-
                 $emiratesmediapathurl = asset("storage/{$emiratesmedia->media_path}");
                 $emiratesmedia['media_path'] = $emiratesmediapathurl;
                 $Employee['emirates_image_id'] = $emiratesmedia;
@@ -610,11 +584,8 @@ class EmployeeController extends Controller
         // handling the profile in this case
         $Employeepassportid = $Employee->passport_image_id;
         if ($Employeepassportid !== null) {
-
             $passportmedia = Media::where('id', $Employeepassportid)->first();
             if ($passportmedia) {
-
-
                 $passportmediapathurl = asset("storage/{$passportmedia->media_path}");
                 $passportmedia['media_path'] = $passportmediapathurl;
                 $Employee['passport_image_id'] = $passportmedia;
@@ -622,7 +593,7 @@ class EmployeeController extends Controller
         }
 
         return response()->json([
-            'message' => 'Employee data retrived successfully',
+            'message'  => 'Employee data retrived successfully',
             'Employee' => $Employee,
         ], 200);
     }
@@ -636,37 +607,40 @@ class EmployeeController extends Controller
      *     summary="Update the employee.Permission required = employee.update",
      *     description="This endpoint updates a employee.",
      *     tags={"Employee"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the employee to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
      *                     example="New Employee",
      *                     description="The name of the employee =>required"
      *                 ),
-     *
-     *
      *                 @OA\Property(
      *                     property="phone_no",
      *                     type="number",
      *                     example="0332322112",
      *                     description="The phon3_no of the employee => required"
      *                 ),
-     *
      *                 @OA\Property(
      *                     property="gender",
      *                     type="checkbox",
@@ -751,7 +725,6 @@ class EmployeeController extends Controller
      *                     example="1",
      *                     description="The designation of the employee=>nullable"
      *                 ),
-     *
      *                            @OA\Property(
      *                     property="profile_image_id",
      *                     type="file",
@@ -779,17 +752,16 @@ class EmployeeController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="200", description="employee updated successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
-
-
     public function update(CreateEmployeeRequest $employeeRequest, Employee $employee)
     {
         DB::beginTransaction();
+
         try {
             $employeedata = $employeeRequest->validated();
             // UPDATING NEW USER
@@ -800,7 +772,6 @@ class EmployeeController extends Controller
             } else {
                 $status = $employee->status;
             }
-
 
             // Check if the status is being updated to inactive and if the employee has active duties
             if ($status == '0') {
@@ -813,9 +784,9 @@ class EmployeeController extends Controller
                     $active_duties = $employee->duties()->where('status', '1')->get();
 
                     return response()->json([
-                        'message' => 'This employee cannot be inactivated as he/she is assigned to active duties',
-                        'active_duties' => $active_duties,
-                        'active_duties_count' => $active_duties_count
+                        'message'             => 'This employee cannot be inactivated as he/she is assigned to active duties',
+                        'active_duties'       => $active_duties,
+                        'active_duties_count' => $active_duties_count,
                     ], 422);
                 }
             }
@@ -823,8 +794,8 @@ class EmployeeController extends Controller
             $loggedinuser = auth::user();
             $loggedinuserid = $loggedinuser->id;
             $updateduserdata = [
-                'status' => $status,
-                'modified_by' => $loggedinuserid
+                'status'      => $status,
+                'modified_by' => $loggedinuserid,
             ];
 
             // finally updating the user\
@@ -833,7 +804,6 @@ class EmployeeController extends Controller
             // handling the media files files
             // profile_image
             if ($employeeRequest->hasFile('profile_image_id')) {
-
                 if ($employee->profile_image_id) {
                     $previousprofile = Media::find($employee->profile_image_id);
                     if ($previousprofile) {
@@ -849,17 +819,16 @@ class EmployeeController extends Controller
 
                 // creating the new media for the profileimage
                 $profileimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $profileimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $profileimage_name,
                     'media_path' => $profileimagepath,
-                    'extension' => $profileimageextension
+                    'extension'  => $profileimageextension,
                 ]);
-                $employeedata['profile_image_id']  = $profileimagemedia->id;
+                $employeedata['profile_image_id'] = $profileimagemedia->id;
             }
 
             //resume_image
             if ($employeeRequest->hasFile('resume_image_id')) {
-
                 if ($employee->resume_image_id) {
                     $previousresume = Media::find($employee->resume_image_id);
                     if ($previousresume) {
@@ -874,12 +843,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the resumeimage
                 $resumeimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $resumeimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $resumeimage_name,
                     'media_path' => $resumeimagepath,
-                    'extension' => $resumeimageextension
+                    'extension'  => $resumeimageextension,
                 ]);
-                $employeedata['resume_image_id']  = $resumeimagemedia->id;
+                $employeedata['resume_image_id'] = $resumeimagemedia->id;
             }
 
             //passport_image
@@ -898,12 +867,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the passportimage
                 $passportimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $passportimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $passportimage_name,
                     'media_path' => $passportimagepath,
-                    'extension' => $passportimageextension
+                    'extension'  => $passportimageextension,
                 ]);
-                $employeedata['passport_image_id']  = $passportimagemedia->id;
+                $employeedata['passport_image_id'] = $passportimagemedia->id;
             }
 
             //emirates_image
@@ -923,12 +892,12 @@ class EmployeeController extends Controller
 
                 // creating the new media for the emiratesimage
                 $emiratesimagemedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $emiratesimage_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $emiratesimage_name,
                     'media_path' => $emiratesimagepath,
-                    'extension' => $emiratesimageextension
+                    'extension'  => $emiratesimageextension,
                 ]);
-                $employeedata['emirates_image_id']  = $emiratesimagemedia->id;
+                $employeedata['emirates_image_id'] = $emiratesimagemedia->id;
             }
 
             // UPDATING THE EMPLOYEE
@@ -938,23 +907,23 @@ class EmployeeController extends Controller
             // associating the employee with the tenant
             $tenantaccociated = $loggedinuser->tenant;
             if ($tenantaccociated) {
-
                 $tenantaccociated->employees()->save($newemployee);
             }
             DB::commit();
+
             return response()->json([
-                'message' => 'employee and associated user are updated successfully',
-                'employee' => $employee
+                'message'  => 'employee and associated user are updated successfully',
+                'employee' => $employee,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -971,11 +940,13 @@ class EmployeeController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the Employee to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -983,21 +954,20 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         DB::beginTransaction();
-        try {
 
+        try {
             $active_duties = $employee->duties()
                 ->where('status', '1')
                 ->count();
 
             if ($active_duties > 0) {
                 return response()->json([
-                    'message' => 'Cannot delete employee. There are active duties associated with them.'
+                    'message' => 'Cannot delete employee. There are active duties associated with them.',
                 ]);
             }
 
             $employee->delete();
             $employee->user()->delete();
-
 
             if ($employee->profile_image_id) {
                 $previousprofile = Media::find($employee->profile_image_id);
@@ -1029,15 +999,17 @@ class EmployeeController extends Controller
             }
 
             DB::commit();
+
             return response()->json([
                 'message' => 'The Employee and the associated user is deleted',
 
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }

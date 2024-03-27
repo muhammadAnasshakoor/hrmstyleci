@@ -3,40 +3,36 @@
 use App\Http\Controllers\API\AttendanceController;
 use App\Http\Controllers\API\AttendanceReportController;
 use App\Http\Controllers\API\AttendanceRosterController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\RegisterController;
-use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\API\RoleController;
-use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\DashboardController;
-use App\Http\Controllers\API\ResignationController;
-use App\Http\Controllers\API\TenantController;
-use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\DesignationController;
 use App\Http\Controllers\API\DutyController;
+use App\Http\Controllers\API\EmployeeController;
 use App\Http\Controllers\API\EmployeeTransferController;
-use App\Http\Controllers\API\PolicyController;
 use App\Http\Controllers\API\EquipmentController;
 use App\Http\Controllers\API\HolidayController;
 use App\Http\Controllers\API\LeaveController;
 use App\Http\Controllers\API\NotificationController;
+use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\PolicyController;
+use App\Http\Controllers\API\RegisterController;
+use App\Http\Controllers\API\ResignationController;
+use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\SubscriberController;
 use App\Http\Controllers\API\SubscriptionPlanController;
+use App\Http\Controllers\API\TenantController;
 use App\Http\Controllers\API\TenantReportController;
-
+use App\Http\Controllers\API\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::controller(RegisterController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('login', 'login');
 });
 
-
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::middleware(\App\Http\Middleware\CorsMiddleware::class)->group(function () {
-
         Route::resource('duty', DutyController::class);
         Route::get('duty/get-rosters/{id}', [DutyController::class, 'getRosters']);
         Route::get('duty/inactive-duties', [DutyController::class, 'inactiveDuties']);
@@ -46,7 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('company', CompanyController::class);
         Route::post('company/{company}', [CompanyController::class, 'update']);
         Route::get('company/inactive-companies', [CompanyController::class, 'inactiveCompanies']);
-
 
         Route::resource('tenant', TenantController::class);
         Route::Post('tenant/{tenant}', [TenantController::class, 'update']);
@@ -92,14 +87,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard']);
         Route::post('/empoloyeetransfer/createduty', [EmployeeTransferController::class, 'createNewDuty']);
 
-
         Route::resource('tenant-report', TenantReportController::class);
         Route::get('get-tenant-report/{id}', [TenantReportController::class, 'report']);
 
-
         Route::resource('user', UserController::class);
         Route::get('user/inactive-users', [UserController::class, 'inactiveUsers']);
-
 
         Route::resource('notification', NotificationController::class);
 
@@ -114,7 +106,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('leave/update-status/{leave}', [LeaveController::class, 'updateStatus']);
     });
 });
-
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

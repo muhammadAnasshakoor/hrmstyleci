@@ -2,21 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Models\User_type;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
-
-
-
-
-
-
 
 /**
  * @OA\Tag(
@@ -29,11 +20,10 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
-        $this->middleware('checkPermission:user.list')->only('index','inactiveUsers');
+        $this->middleware('checkPermission:user.list')->only('index', 'inactiveUsers');
         $this->middleware('checkPermission:user.create')->only('create');
         $this->middleware('checkPermission:user.store')->only('store');
         $this->middleware('checkPermission:user.edit')->only('show');
@@ -47,22 +37,22 @@ class UserController extends Controller
      *      summary="Get All  active users.Permission required = user.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"User"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function index()
     {
-        $users  = User::where('status','1')
+        $users = User::where('status', '1')
         ->with('roles')
         ->get();
+
         return response()->json([
             'message' => 'List of active users retrieved successfully',
-            'users' => $users
+            'users'   => $users,
         ]);
     }
-
 
     /**
      * @OA\Get(
@@ -70,27 +60,30 @@ class UserController extends Controller
      *      summary="Get All inactive users.Permission required = user.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"User"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
+    public function inactiveUsers()
+    {
+        $users = User::where('status', '0')
+        ->with('roles')
+        ->get();
 
-     public function inactiveUsers()
-     {
-         $users  = User::where('status','0')
-         ->with('roles')
-         ->get();
-         return response()->json([
-             'message' => 'List of inactive users retrieved successfully',
-             'users' => $users,
-         ]);
-     }
+        return response()->json([
+            'message' => 'List of inactive users retrieved successfully',
+            'users'   => $users,
+        ]);
+    }
+
     /**
      * @OA\Get(
      *      path="/api/user/create",
      *      summary="Get All roles.Permission required = user.create",
      *      description="This endpoint retrieves all  roles .",
      *      tags={"User"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -98,12 +91,12 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::select('id', 'name')->get();
+
         return response()->json([
             'message' => 'Roles retrieved successfully!',
-            'Roles' => $roles
+            'Roles'   => $roles,
         ]);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -115,18 +108,21 @@ class UserController extends Controller
      *     summary="Create a new user.Permission required = user.store",
      *     description="This endpoint creates a new user.",
      *     tags={"User"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="email",
      *                     type="email",
      *                     example="example@gmail.com",
      *                     description="The email of the user => required"
      *                 ),
-     *
      *                 @OA\Property(
      *                     property="password",
      *                     type="password",
@@ -139,27 +135,27 @@ class UserController extends Controller
      *                     example="admin",
      *                     description="The role of the user => required"
      *                 ),
-    *             )
+     *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="user created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )fd
      */
-
     public function store(Request $request)
     {
         DB::beginTransaction();
-        try {
 
+        try {
             $user = Auth::user();
             $data = $request->validate([
-                'email' => 'required|email|unique:users',
-                'password' => 'required',
-                'status' => 'nullable|regex:/^[01]$/',
+                'email'       => 'required|email|unique:users',
+                'password'    => 'required',
+                'status'      => 'nullable|regex:/^[01]$/',
                 'modified_by' => 'nullable',
-                'role' => 'required'
+                'role'        => 'required',
             ]);
             $modified_by = $user->id;
             $data['modified_by'] = $modified_by;
@@ -168,18 +164,19 @@ class UserController extends Controller
             // assigning the role to the user
             $role = $request->input('role');
 
-
             $new_user->assignRole($role);
             DB::commit();
+
             return response()->json([
                 'message' => 'User created successfully',
-                'data' => $new_user
+                'data'    => $new_user,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -200,24 +197,25 @@ class UserController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the user ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function show(User $user)
     {
         $user->load('roles');
+
         return response()->json(
             [
                 'message' => 'User retrieved successfully',
-                'User' => $user
+                'User'    => $user,
             ]
         );
     }
@@ -225,27 +223,32 @@ class UserController extends Controller
      * Update the specified resource in storage.
      */
 
-
     /**
      * @OA\Patch(
      *     path="/api/user/{id}",
      *     summary="Update the user.Permission required = user.update",
      *     description="This endpoint updates a user.",
      *     tags={"User"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the user to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
+     *
      *     ),*     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="password",
      *                     type="password",
@@ -267,6 +270,7 @@ class UserController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="user created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
@@ -274,20 +278,17 @@ class UserController extends Controller
      */
     public function update(Request $request, User $previous_user)
     {
-
         $newuserdata = $request->validated();
         DB::beginTransaction();
-        try {
 
+        try {
             $user = Auth::user();
             $data = $request->validate([
-                'password' => 'nullable',
-                'status' => 'nullable|regex:/^[01]$/',
+                'password'    => 'nullable',
+                'status'      => 'nullable|regex:/^[01]$/',
                 'modified_by' => 'nullable',
-                'role' => 'nullable'
+                'role'        => 'nullable',
             ]);
-
-
 
             $modified_by = $user->id;
             $data['modified_by'] = $modified_by;
@@ -298,14 +299,16 @@ class UserController extends Controller
                 $previous_user->assignRole($role);
             }
             DB::commit();
+
             return response()->json([
                 'message' => 'User updated successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -326,32 +329,35 @@ class UserController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the user to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function destroy(User $user)
     {
-
         DB::beginTransaction();
+
         try {
             $user->delete();
             DB::commit();
+
             return response()->json([
                 'message' => 'The user is deleted successfully!',
 
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }

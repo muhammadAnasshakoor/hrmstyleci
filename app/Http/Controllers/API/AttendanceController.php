@@ -2,25 +2,23 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\AttendanceReport;
-use App\Models\Media;
-use App\Models\Employee;
-use Spatie\Permission\Models\Role;
-use App\Models\Tenant;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\CreateAttendanceRequest;
 use App\Models\Attendance;
+use App\Models\AttendanceReport;
 use App\Models\AttendanceRoster;
-use App\Models\User_type;
-use Illuminate\Support\Carbon;
+use App\Models\Company;
+use App\Models\Employee;
+use App\Models\Media;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 /**
  * @OA\Tag(
@@ -28,7 +26,6 @@ use Illuminate\Http\Response;
  *     description="Handling the CRUD operations related to attendance."
  * )
  */
-
 class AttendanceController extends Controller
 {
     /**
@@ -44,11 +41,11 @@ class AttendanceController extends Controller
      * Tenants: View their own attendance and their company's employees.
      * Companies: View attendance of their employees only.",
      *      tags={"Attendance"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
@@ -73,19 +70,19 @@ class AttendanceController extends Controller
                 ->get();
         } else {
             return response()->json([
-                'message' => 'You can not access it '
+                'message' => 'You can not access it ',
             ]);
         }
+
         return response()->json([
             'message' => 'All attendances',
-            'data' => $attendances
+            'data'    => $attendances,
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-
     public function create()
     {
     }
@@ -103,11 +100,15 @@ class AttendanceController extends Controller
      *     Employee: If an employee is marking attendance, no input is needed. Attendance is automatically
      *     recorded twice a day: once for check-in and again for check-out, according to the current time.",
      *     tags={"Attendance"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="string",
@@ -141,16 +142,16 @@ class AttendanceController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="Attendance created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
     public function store(CreateAttendanceRequest $request)
     {
-
         DB::beginTransaction();
+
         try {
             $attendance_data = $request->validated();
             // Get the current date
@@ -165,13 +166,12 @@ class AttendanceController extends Controller
             // Check the role of the authenticated user
             if ($user->tenant || $user->company) {
                 // checking if the employee id field is filled
-                if (!($request->filled('employee_id'))) {
+                if (!$request->filled('employee_id')) {
                     return response()->json([
-                        'message' => 'Employee_id field is required'
+                        'message' => 'Employee_id field is required',
                     ]);
                 }
                 if ($user->company) {
-
                     $company = $user->company;
                     $company_id = $company->id;
                     $tenant_id = $company->tenant_id;
@@ -189,7 +189,7 @@ class AttendanceController extends Controller
 
                 if ($request->input('check_in') === null || $request->input('check_out') === null) {
                     return response()->json([
-                        'message' => 'The check_in and check_out fields are required'
+                        'message' => 'The check_in and check_out fields are required',
                     ]);
                 }
                 $check_in_time = \DateTime::createFromFormat('h:i A', $attendance_data['check_in']);
@@ -197,15 +197,14 @@ class AttendanceController extends Controller
 
                 // Check if check-out time is before or equal to check-in time
                 if ($check_out_time <= $check_in_time) {
-
                     return response()->json([
-                        'message' => 'The exit time cannot be before or equal to the entry time.'
+                        'message' => 'The exit time cannot be before or equal to the entry time.',
                     ]);
                 }
 
                 // Calculate the interval between check-in and check-out
                 $interval = $check_out_time->diff($check_in_time);
-                $attendance_data['total_hours'] =  $interval->format('%H:%I');
+                $attendance_data['total_hours'] = $interval->format('%H:%I');
 
                 $employee = Employee::where('id', $request->input('employee_id'))->first();
 
@@ -253,8 +252,8 @@ class AttendanceController extends Controller
                     }
 
                     return response()->json([
-                        'message' => 'Attendance roster for the whole month is not complete.',
-                        'Missiog dates' => $data
+                        'message'       => 'Attendance roster for the whole month is not complete.',
+                        'Missiog dates' => $data,
                     ]);
                 }
 
@@ -263,7 +262,7 @@ class AttendanceController extends Controller
                     ->where('employee_id', $request->input('employee_id'))->first();
                 if (!$roster) {
                     return response()->json([
-                        'message' => 'i got it'
+                        'message' => 'i got it',
                     ]);
                 }
 
@@ -273,33 +272,33 @@ class AttendanceController extends Controller
                 if ($roster->check_in == null && $roster->check_out == null && $roster->holiday == '1') {
                     $time = 'Holiday';
                 } elseif ($roster->check_in != null && $roster->check_out != null && $roster->holiday == '0') {
-                    $time = 'From' . $check_in . 'To' . $check_out;
+                    $time = 'From'.$check_in.'To'.$check_out;
                 }
                 AttendanceReport::create([
-                    'tenant_id' => $tenant_id,
-                    'attendance_id' => $new_attendance->id,
-                    'employee_id' => $employee->id,
-                    'employee_name' => $employee->name,
-                    'checkin' => $request->input('check_in'),
-                    'checkout' => $request->input('check_out'),
+                    'tenant_id'          => $tenant_id,
+                    'attendance_id'      => $new_attendance->id,
+                    'employee_id'        => $employee->id,
+                    'employee_name'      => $employee->name,
+                    'checkin'            => $request->input('check_in'),
+                    'checkout'           => $request->input('check_out'),
                     'total_hours_worked' => $new_attendance->total_hours,
-                    'type' => $new_attendance->type,
-                    'reason' => $new_attendance->reason,
-                    'day' => $day_name,
-                    'expected_time' => $time,
-                    'company_id' => $new_attendance->company_id,
-                    'date' => $current_date
+                    'type'               => $new_attendance->type,
+                    'reason'             => $new_attendance->reason,
+                    'day'                => $day_name,
+                    'expected_time'      => $time,
+                    'company_id'         => $new_attendance->company_id,
+                    'date'               => $current_date,
                 ]);
                 DB::commit();
+
                 return response()->json([
-                    'message' => 'Attendance is marked successfully',
+                    'message'    => 'Attendance is marked successfully',
                     'attendance' => $new_attendance,
 
                 ]);
             }
             // If the attendance is being marked by the employee itself
             elseif ($user->employee) {
-
                 $employee = $user->employee;
                 $employee_id = $employee->id;
                 $tenant_id = $employee->tenant_id;
@@ -331,17 +330,18 @@ class AttendanceController extends Controller
                     foreach ($missing_dates as $date) {
                         $data[] = $date;
                     }
+
                     return response()->json([
-                        'message' => 'Attendance roster for the whole month is not complete.',
-                        'Missiog dates' => $data
+                        'message'       => 'Attendance roster for the whole month is not complete.',
+                        'Missiog dates' => $data,
                     ]);
                 }
 
                 // getting the company id for the using the duty of the employe
                 $duty = $employee->duties()->where('status', '1')->first();
-                if (!($duty)) {
+                if (!$duty) {
                     return response()->json([
-                        'message' => 'Attendance can not be marked as there is no duty assigned to this employee.'
+                        'message' => 'Attendance can not be marked as there is no duty assigned to this employee.',
                     ]);
                 }
 
@@ -360,7 +360,6 @@ class AttendanceController extends Controller
 
                 // If the employee has not marked attendance yet
                 if (!$check_in_attendance) {
-
                     $attendance_data['check_in'] = now()->format('h:i A');
                     $check_in_time = \DateTime::createFromFormat('h:i A', $attendance_data['check_in']);
                     $attendance_data['employee_id'] = $employee_id;
@@ -382,25 +381,26 @@ class AttendanceController extends Controller
                     if ($roster->check_in == null && $roster->check_out == null && $roster->holiday == '1') {
                         $time = 'Holiday';
                     } elseif ($roster->check_in != null && $roster->check_out != null && $roster->holiday == '0') {
-                        $time = 'From' . $check_in . 'To' . $check_out;
+                        $time = 'From'.$check_in.'To'.$check_out;
                     }
                     AttendanceReport::create([
-                        'tenant_id' => $tenant_id,
+                        'tenant_id'     => $tenant_id,
                         'attendance_id' => $new_attendance->id,
-                        'employee_id' => $employee_id,
+                        'employee_id'   => $employee_id,
                         'employee_name' => $employee->name,
-                        'checkin' => $new_attendance->check_in,
-                        'type' => $new_attendance->type,
-                        'reason' => $new_attendance->reason,
-                        'day' => $day_name,
+                        'checkin'       => $new_attendance->check_in,
+                        'type'          => $new_attendance->type,
+                        'reason'        => $new_attendance->reason,
+                        'day'           => $day_name,
                         'expected_time' => $time,
-                        'company_id' => $new_attendance->company_id,
-                        'date' => $current_date
+                        'company_id'    => $new_attendance->company_id,
+                        'date'          => $current_date,
                     ]);
 
                     DB::commit();
+
                     return response()->json([
-                        'message' => 'attendance is marked successfully',
+                        'message'    => 'attendance is marked successfully',
                         'attendance' => $new_attendance,
                     ]);
                 } else {
@@ -411,47 +411,54 @@ class AttendanceController extends Controller
 
                         $check_in_time = \DateTime::createFromFormat('h:i A', $check_in_attendance->check_in);
                         $interval = $check_out_time->diff($check_in_time);
-                        $attendance_data['total_hours'] =  $interval->format('%H:%I');
+                        $attendance_data['total_hours'] = $interval->format('%H:%I');
 
                         $check_in_attendance->update($attendance_data);
 
                         // storing the data in the attendance report
                         $attendance_report = $check_in_attendance->attendanceReport;
                         $attendance_report->update([
-                            'checkout' => $check_in_attendance->check_out,
+                            'checkout'           => $check_in_attendance->check_out,
                             'total_hours_worked' => $check_in_attendance->total_hours,
                         ]);
                         DB::commit();
+
                         return response()->json([
-                            'message' => 'Check-out attendance is marked'
+                            'message' => 'Check-out attendance is marked',
                         ]);
                     } else {
                         // it checks if you have already marked the check_in and check_out attendance
                         return response()->json([
-                            'message' => 'Attendance has already been marked for today'
+                            'message' => 'Attendance has already been marked for today',
                         ]);
                     }
                 }
             }
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
+
     /**
      * @OA\Post(
      *      path="/api/attendance/get-employee",
      *      summary="GET The Employee. Permission required = attendance.store",
      *      description="This endpoint retrieves a specific employee by providing their Emirates ID.",
      *      tags={"Attendance"},
+     *
      *      @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="searchdata",
      *                     type="string",
@@ -461,11 +468,11 @@ class AttendanceController extends Controller
      *             )
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
     public function getEmployee(Request $request)
     {
         $search_data = $request->input('searchdata');
@@ -474,8 +481,8 @@ class AttendanceController extends Controller
         $tenantId = $tenant->id;
 
         $employees = Employee::where(function ($query) use ($search_data) {
-            $query->where('name', 'LIKE', '%' . $search_data . '%')
-                ->orWhere('emirates_id', 'LIKE', '%' . $search_data . '%');
+            $query->where('name', 'LIKE', '%'.$search_data.'%')
+                ->orWhere('emirates_id', 'LIKE', '%'.$search_data.'%');
         })
             ->whereHas('duties', function ($subQuery) {
                 $subQuery->where('status', 1);
@@ -483,8 +490,6 @@ class AttendanceController extends Controller
             ->where('tenant_id', $tenantId)
             ->select('id', 'name', 'emirates_id', 'profile_image_id')
             ->get();
-
-
 
         foreach ($employees as $employee) {
             $profile_image_id = $employee->profile_image_id;
@@ -495,16 +500,16 @@ class AttendanceController extends Controller
             }
         }
 
-
         if ($employees->count() <= 0) {
             return response()->json([
                 'message' => 'Oops! No employee found with the provided Emirates ID.',
-                'status' => 'error'
+                'status'  => 'error',
             ], 404);
         }
+
         return response()->json([
-            'message' => 'Employees on duties are  retrieved successfully',
-            'Employee' => $employees
+            'message'  => 'Employees on duties are  retrieved successfully',
+            'Employee' => $employees,
         ]);
     }
 
@@ -517,34 +522,34 @@ class AttendanceController extends Controller
      *      summary="GET The attendance. Permission required = attendance.edit",
      *      description="This endpoint retrieves a specific attendance by providing its ID.",
      *      tags={"Attendance"},
+     *
      *      @OA\Parameter(
      *          name="id",
      *          in="path",
      *          required=true,
      *          description="The ID of the attendance",
+     *
      *          @OA\Schema(
      *              type="integer",
      *              format="int64"
      *          )
      *      ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
     public function show(Attendance $attendance)
     {
-
         return response()->json([
-            'message' => 'Attendance information retrieved successfully.',
-            'attendance' => $attendance
+            'message'    => 'Attendance information retrieved successfully.',
+            'attendance' => $attendance,
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-
     public function edit(string $id)
     {
         //
@@ -559,22 +564,28 @@ class AttendanceController extends Controller
      *     summary="Update the attendance. Permission required = attendance.update",
      *     description="Only the tenant and the company can update attendance, and they can only update attendance records that were created on the same day as the update.",
      *     tags={"Attendance"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the attendance to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="string",
@@ -608,6 +619,7 @@ class AttendanceController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="Attendance updated successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
@@ -615,8 +627,8 @@ class AttendanceController extends Controller
      */
     public function update(CreateAttendanceRequest $request, string $id)
     {
-
         DB::beginTransaction();
+
         try {
             $attendance_data = $request->validated();
             // Get the current date
@@ -627,16 +639,14 @@ class AttendanceController extends Controller
             // Initialize variables for tenant and company IDs
 
             if ($user->tenant || $user->company) {
-
                 $previous_attendance = Attendance::where('id', $id)->first();
                 if ($previous_attendance->date !== $current_date) {
                     return response()->json([
-                        'message' => 'You can only update the attendance which is marked today'
+                        'message' => 'You can only update the attendance which is marked today',
                     ]);
                 }
                 if ($request->filled('employee_id')) {
                     if ($previous_attendance->employee_id != $attendance_data['employee_id']) {
-
                         // if input has employee_id then check if the attendance of this employee has already marked for today or not
                         $attendance = Attendance::where('employee_id', $request->input('employee_id'))
                             ->whereDate('date', $current_date)->first();
@@ -650,9 +660,9 @@ class AttendanceController extends Controller
                     }
                 }
 
-                if (!($request->filled('check_in'))  || !($request->filled('check_out')  || !($request->filled('employee_id')))) {
+                if (!$request->filled('check_in') || !($request->filled('check_out') || !$request->filled('employee_id'))) {
                     return response()->json([
-                        'message' => 'The check_in ,check_out and employee_id fields are required'
+                        'message' => 'The check_in ,check_out and employee_id fields are required',
                     ]);
                 }
 
@@ -661,15 +671,14 @@ class AttendanceController extends Controller
 
                 // Check if check-out time is before or equal to check-in time
                 if ($check_out_time <= $check_in_time) {
-
                     return response()->json([
-                        'message' => 'The exit time cannot be before or equal to the entry time.'
+                        'message' => 'The exit time cannot be before or equal to the entry time.',
                     ]);
                 }
 
                 // Calculate the interval between check-in and check-out
                 $interval = $check_out_time->diff($check_in_time);
-                $attendance_data['total_hours'] =  $interval->format('%H:%I');
+                $attendance_data['total_hours'] = $interval->format('%H:%I');
 
                 $previous_attendance->update($attendance_data);
 
@@ -679,16 +688,17 @@ class AttendanceController extends Controller
                 $name = $previous_attendance->employee->name;
                 $attendance_report = $previous_attendance->attendanceReport;
                 $attendance_report->update([
-                    'employee_id' => $previous_attendance->employee_id,
-                    'employee_name' => $name,
-                    'checkin' => $previous_attendance->check_in,
-                    'checkout' => $previous_attendance->check_out,
+                    'employee_id'        => $previous_attendance->employee_id,
+                    'employee_name'      => $name,
+                    'checkin'            => $previous_attendance->check_in,
+                    'checkout'           => $previous_attendance->check_out,
                     'total_hours_worked' => $previous_attendance->total_hours,
-                    'type' => $previous_attendance->type,
-                    'reason' => $previous_attendance->reason,
+                    'type'               => $previous_attendance->type,
+                    'reason'             => $previous_attendance->reason,
                 ]);
 
                 DB::commit();
+
                 return response()->json([
                     'message' => 'attendance is updated successfully',
                     // 'attendance' => $previous_attendance
@@ -696,9 +706,10 @@ class AttendanceController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -706,7 +717,6 @@ class AttendanceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-
     public function destroy(string $id)
     {
         //

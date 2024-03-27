@@ -2,31 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Media;
-use App\Models\Policy;
-use App\Models\AttendanceRoster;
-use Spatie\Permission\Models\Role;
-use App\Models\Tenant;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\CreateAttendanceRequest;
 use App\Http\Requests\CreateAttendanceRosterRequest;
 use App\Models\Attendance;
+use App\Models\AttendanceRoster;
 use App\Models\Employee;
-use App\Models\User_type;
-use Illuminate\Support\Facades\Validator;
-
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Tenant;
 use Carbon\Carbon;
-use Illuminate\Foundation\Console\AboutCommand;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -48,11 +33,11 @@ class AttendanceRosterController extends Controller
      *      summary="Get All attendance-rosters.Permission required = attendance-roster.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Attendance Roster"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
@@ -74,14 +59,12 @@ class AttendanceRosterController extends Controller
             ->with(['employee:id,name,emirates_id'])
             ->orderBy('created_at', 'desc')
             ->get();
+
         return response()->json([
             'message' => 'Rosters retrieved successfully',
-            'Rosters' => $Rosters
+            'Rosters' => $Rosters,
         ]);
     }
-
-
-
 
     /**
      * @OA\Get(
@@ -92,13 +75,11 @@ class AttendanceRosterController extends Controller
      * 2. For holidays, the input fields (check_in and check_out) should be disabled, and by default, the holiday flag (holiday = 1) is set, leaving check_in and check_out as null.",
      *
      *      tags={"Attendance Roster"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
-
     public function create()
     {
         $user = Auth::user();
@@ -121,8 +102,6 @@ class AttendanceRosterController extends Controller
             return ['date' => $date->toDateString()]; // Wrap date in array for consistency
         });
 
-
-
         // Get holidays for the tenant
         $holidays = $tenant->holidays;
 
@@ -134,12 +113,13 @@ class AttendanceRosterController extends Controller
                 $end_date = Carbon::parse($holiday->ending_date);
                 $all_holiday_dates = collect(Carbon::parse($start_date)->daysUntil($end_date))->map(function ($date) use ($holiday) {
                     return [
-                        'date' => $date->toDateString(),
-                        'message' => 'Holiday: ' . $holiday->name,
+                        'date'    => $date->toDateString(),
+                        'message' => 'Holiday: '.$holiday->name,
                     ]; // Wrap date in array for consistency
                 });
                 $holiday_collection = $holiday_collection->merge($all_holiday_dates); // Merge with the main collection
             }
+
             return $holiday_collection; // Ensure uniqueness and reset keys
         };
 
@@ -149,6 +129,7 @@ class AttendanceRosterController extends Controller
         // Filter the $holidays collection based on the date range
         $holidays_filtered = $holidays->filter(function ($holiday) use ($start_of_month, $end_of_month) {
             $holiday_date = Carbon::parse($holiday['date']);
+
             return $holiday_date->between($start_of_month, $end_of_month);
         });
 
@@ -156,14 +137,11 @@ class AttendanceRosterController extends Controller
         $all_dates = $holidays_filtered->merge($expected_dates)->sortBy('date')->unique('date')->values()->all(); // Sort by date
 
         return response()->json([
-            'message' => "Successfully retrieved active employees having active duties.",
+            'message'   => 'Successfully retrieved active employees having active duties.',
             'employees' => $employees,
-            'all_dates' => $all_dates
+            'all_dates' => $all_dates,
         ]);
     }
-
-
-
 
     /**
      * @OA\post(
@@ -172,18 +150,21 @@ class AttendanceRosterController extends Controller
      *      description="You need to give the employee_id for one time. Then give all fields in the JSON form in the attendance.
      *",
      *      tags={"Attendance Roster"},
+     *
      *      @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="integer",
      *                     example="1",
      *                     description="The id of the employee that is needed to assign to the roster (required)"
      *                 ),
-     *
      *                 @OA\Property(
      *                     property="roster_json",
      *                     type="json",
@@ -236,29 +217,26 @@ class AttendanceRosterController extends Controller
      *             )
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
-
-
-
     public function store(CreateAttendanceRosterRequest $request)
     {
         DB::beginTransaction();
+
         try {
             // getting the tenant_id
             $user = Auth::user();
             $tenant = $user->tenant;
             $tenant_id = $tenant->id;
-            
 
             $roster_data = $request->validated();
             $roster_data['tenant_id'] = $tenant_id;
 
             $latest_entry = AttendanceRoster::withTrashed()->latest()->first();
-            if (!($latest_entry)) {
+            if (!$latest_entry) {
                 $batch_id = 0;
             } else {
                 $batch_id = $latest_entry->batch_id;
@@ -277,62 +255,58 @@ class AttendanceRosterController extends Controller
 
                 if ($double_roster) {
                     return response()->json([
-                        'message' => 'Double Entry Detected At ' . $data['date'] . ': An entry for this employee on the same date already exists'
+                        'message' => 'Double Entry Detected At '.$data['date'].': An entry for this employee on the same date already exists',
                     ]);
                 }
 
-
                 if ($data['check_in'] !== null && $data['check_out'] !== null) {
-
                     // Validate the format of the date field
                     $validationRules = [
-                        'date' => 'required|date_format:Y-m-d',
-                        'check_in' => 'nullable|date_format:h:i A',
+                        'date'      => 'required|date_format:Y-m-d',
+                        'check_in'  => 'nullable|date_format:h:i A',
                         'check_out' => 'nullable|date_format:h:i A',
-                        'holiday' => 'required|boolean',
+                        'holiday'   => 'required|boolean',
                     ];
                 } else {
                     $validationRules = [
-                        'date' => 'required|date_format:Y-m-d',
-                        'check_in' => 'nullable',
+                        'date'      => 'required|date_format:Y-m-d',
+                        'check_in'  => 'nullable',
                         'check_out' => 'nullable',
-                        'holiday' => 'required|boolean',
+                        'holiday'   => 'required|boolean',
                     ];
                 }
                 $validator = Validator::make($data, $validationRules);
 
                 if ($validator->fails()) {
                     return response()->json([
-                        'message' => 'Validation Error: Please check your input fields at ' . $data['date'],
-                        'errors' => $validator->errors()->all(),
+                        'message' => 'Validation Error: Please check your input fields at '.$data['date'],
+                        'errors'  => $validator->errors()->all(),
                     ]);
                 }
 
                 $check_in = $data['check_in'];
 
-
                 $new_roster = AttendanceRoster::create([
-                    'tenant_id' => $tenant_id,
+                    'tenant_id'   => $tenant_id,
                     'employee_id' => $request->input('employee_id'),
-                    'batch_id' => $batch_id,
-                    'check_in' => $check_in,
-                    'check_out' => $data['check_out'],
-                    'holiday' => $data['holiday'],
-                    'date' => $data['date'],
+                    'batch_id'    => $batch_id,
+                    'check_in'    => $check_in,
+                    'check_out'   => $data['check_out'],
+                    'holiday'     => $data['holiday'],
+                    'date'        => $data['date'],
                 ]);
 
-
                 // check if the day is assigned to holiday with the check_in and check_out time recorded
-                if ($new_roster->holiday == 1  && ($new_roster->check_in != null || $new_roster->check_out != null)) {
+                if ($new_roster->holiday == 1 && ($new_roster->check_in != null || $new_roster->check_out != null)) {
                     return response()->json([
-                        'message' => 'Error At' . $data['date'] . ':Unable to set this date to holiday  with check-in or check-out time recorded. Please remove check-in/check-out time before setting this day to holiday.'
+                        'message' => 'Error At'.$data['date'].':Unable to set this date to holiday  with check-in or check-out time recorded. Please remove check-in/check-out time before setting this day to holiday.',
                     ]);
                 }
                 // Check if the day is not marked as a holiday and either check-in or check-out time is missing
-                if ($new_roster->holiday == 0  && ($new_roster->check_in == null || $new_roster->check_out == null)) {
+                if ($new_roster->holiday == 0 && ($new_roster->check_in == null || $new_roster->check_out == null)) {
                     return response()->json([
 
-                        'message' => 'Incomplete Entry At' . $data['date'] . ': Since this day is not marked as a holiday, both check-in and check-out times are required.'
+                        'message' => 'Incomplete Entry At'.$data['date'].': Since this day is not marked as a holiday, both check-in and check-out times are required.',
                     ]);
                 }
 
@@ -340,15 +314,17 @@ class AttendanceRosterController extends Controller
             }
 
             DB::commit();
+
             return response()->json([
                 'message' => 'Roster created successfully',
-                'Roster' => $all_rosters
+                'Roster'  => $all_rosters,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -359,16 +335,19 @@ class AttendanceRosterController extends Controller
      *      summary="GET The attendance-roster.Permission required = attendance-roster.edit",
      *      description="This endpoint Gives a specific  attendance-roster.",
      *      tags={"Attendance Roster"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the attendance-roster ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -376,27 +355,29 @@ class AttendanceRosterController extends Controller
     public function show(string $id)
     {
         DB::beginTransaction();
+
         try {
             $roster = AttendanceRoster::findOrFail($id);
             if (isEmpty($roster)) {
                 return response()->json([
-                    'message' => 'The roster could not be found'
+                    'message' => 'The roster could not be found',
                 ]);
             }
             DB::commit();
+
             return response()->json([
                 'message' => 'Roster retrieved successfully',
-                'Roster' => $roster
+                'Roster'  => $roster,
             ]);
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
-
 
     /**
      * @OA\Patch(
@@ -404,22 +385,28 @@ class AttendanceRosterController extends Controller
      *     summary="Update the attendance-roster.Permission required = attendance-roster.update",
      *     description="This endpoint updates a attendance-roster.",
      *     tags={"Attendance Roster"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the attendance-roster to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="integer",
@@ -432,14 +419,12 @@ class AttendanceRosterController extends Controller
      *                     example="10:00 PM",
      *                     description="The entry time of the employee "
      *                 ),
-
      *     @OA\Property(
      *                     property="check_out",
      *                     type="time",
      *                     example="10:00 PM",
      *                     description="The check_out time of the employee "
      *                 ),
-     *
      *      @OA\Property(
      *                     property="holiday",
      *                     type="check_box",
@@ -455,29 +440,31 @@ class AttendanceRosterController extends Controller
      *             )
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
-
     public function update(CreateAttendanceRosterRequest $request, string $id)
     {
         DB::beginTransaction();
+
         try {
             $roster = AttendanceRoster::findOrFail($id);
             $roster_data = $request->validated();
             $roster->update($roster_data);
             DB::commit();
+
             return response()->json([
                 'message' => 'Roster updated successfully',
-                'Roster' => $roster
+                'Roster'  => $roster,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -493,33 +480,35 @@ class AttendanceRosterController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the attendance-roster to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function destroy(AttendanceRoster $roster, string $id)
     {
-
-
         DB::beginTransaction();
+
         try {
             $roster = AttendanceRoster::findOrFail($id);
             $roster->delete();
             DB::commit();
+
             return response()->json([
                 'message' => 'Roster deleted successfully',
             ]);
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }

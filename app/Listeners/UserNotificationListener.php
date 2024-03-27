@@ -2,14 +2,10 @@
 
 namespace App\Listeners;
 
-use App\Models\User;
 use App\Events\NotifyUser;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Notifications\UserNotification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UserNotificationListener
 {

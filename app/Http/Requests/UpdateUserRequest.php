@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateUserRequest extends FormRequest
@@ -25,16 +25,17 @@ class UpdateUserRequest extends FormRequest
     {
         return [
 
-            'status' => 'nullable|regex:/^[01]$/',
+            'status'      => 'nullable|regex:/^[01]$/',
             'modified_by' => 'nullable',
         ];
     }
+
     protected function failedValidation(Validator $validator)
     {
         // Custom response or throw an exception
         throw new HttpResponseException(response()->json([
             'message' => 'Validation failed',
-            'errors' => $validator->errors(),
+            'errors'  => $validator->errors(),
         ], 422));
     }
 }

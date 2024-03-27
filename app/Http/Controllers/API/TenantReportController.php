@@ -2,24 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\AttendanceReport;
+use App\Models\Company;
 use App\Models\Media;
-use App\Models\Employee;
-use Spatie\Permission\Models\Role;
 use App\Models\Tenant;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\CreateAttendanceRequest;
-use App\Models\Attendance;
-use App\Models\User_type;
-use Illuminate\Support\Carbon;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -27,19 +16,17 @@ use Illuminate\Http\Response;
  *     description="Handling the crud of Company Report in it."
  * )
  */
-
 class TenantReportController extends Controller
 {
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
-        $this->middleware('checkPermission:company-report.list')->only('report','create');
+        $this->middleware('checkPermission:company-report.list')->only('report', 'create');
     }
+
     public function index()
     {
     }
-
 
     /**
      * @OA\Get(
@@ -47,24 +34,27 @@ class TenantReportController extends Controller
      *      summary="Get the company report.Permission required = company-report.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Company Report"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The id of the company against which you need the report",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function report(string $id)
     {
         DB::beginTransaction();
+
         try {
             $company = Company::find($id);
 
@@ -90,24 +80,26 @@ class TenantReportController extends Controller
             if (!($duties_count > 0)) {
                 return response()->json([
                     'Company' => $company,
-                    'message' => 'No duties could be found for this company'
+                    'message' => 'No duties could be found for this company',
                 ]);
             }
             foreach ($duties as $duty) {
                 $duty->load('employee', 'policy', 'equipments', 'attendanceRoster');
             }
             DB::commit();
+
             return response()->json([
                 'message' => 'The data fetched successfully',
                 'company' => $company,
-                'duties' => $duties
+                'duties'  => $duties,
 
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -118,6 +110,7 @@ class TenantReportController extends Controller
      *      summary="Get All companies.Permission required = company-report.list",
      *      description="This endpoint retrieves all  companies related to this logged in tenant.",
      *      tags={"Company Report"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -128,13 +121,11 @@ class TenantReportController extends Controller
         if ($user->tenant) {
             $tenant = $user->tenant;
             $companies = $tenant->companies()->where('status', '1')->get();
+
             return response()->json([
-                'message' => 'This is the list of the all the active companies related to this tenant',
-                'Companies' => $companies
+                'message'   => 'This is the list of the all the active companies related to this tenant',
+                'Companies' => $companies,
             ]);
         }
     }
 }
-
-
-

@@ -2,17 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Policy;
-use App\Models\AttendanceRoster;
-use App\Models\User_type;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -156,35 +153,31 @@ class UserSeeder extends Seeder
             'leave.delete',
         ];
 
-
-
         // Create permissions if they don't exist
         foreach ($permissions as $permission) {
             $this->createpermissionifnotexits($permission, 'sanctum');
         }
         $adminRole = Role::where(['name' => 'admin', 'guard_name' => 'sanctum'])->first();
         if (!$adminRole) {
-            $adminRole =  Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
+            $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'sanctum']);
         }
 
-
         if (!$tenant) {
-            $user1 = new User;
+            $user1 = new User();
             $user1->email = 'tenant@tenant.com';
             $user1->password = bcrypt('12345678'); // Use bcrypt to hash the password
             $user1->status = '1';
             $user1->save();
 
-            $tenant = new Tenant;
+            $tenant = new Tenant();
             $tenant->name = 'newtenant';
             $tenant->status = '1';
             $tenant->user_id = $user1->id;
             $tenant->save();
 
-
             $tenantRole = Role::where(['name' => 'tenant', 'guard_name' => 'sanctum'])->first();
             if (!$tenantRole) {
-                $tenantRole =  Role::create(['name' => 'tenant', 'guard_name' => 'sanctum']);
+                $tenantRole = Role::create(['name' => 'tenant', 'guard_name' => 'sanctum']);
             }
             // get the next 63 permissions and assign to the role tenant
             $nextpermissions = Permission::skip(24)->take(999999)->get();
@@ -193,28 +186,27 @@ class UserSeeder extends Seeder
             $user1->assignRole($tenantRole);
         }
         if (!$company) {
-            $user2 = new User;
+            $user2 = new User();
             $user2->email = 'company@company.com';
             $user2->password = bcrypt('12345678'); // Use bcrypt to hash the password
             $user2->status = '1';
             $user2->save();
 
-            $company = new Company;
+            $company = new Company();
             $company->name = 'newcompany';
             $company->tenant_id = $tenant->id;
             $company->status = '1';
             $company->user_id = $user2->id;
             $company->save();
 
-
             $companyRole = Role::where(['name' => 'company', 'guard_name' => 'sanctum'])->first();
             if (!$companyRole) {
-                $companyRole =  Role::create(['name' => 'company', 'guard_name' => 'sanctum']);
+                $companyRole = Role::create(['name' => 'company', 'guard_name' => 'sanctum']);
             }
         }
 
         if (!$policy) {
-            $policy = new Policy;
+            $policy = new Policy();
             $policy->name = 'firstPOlicy';
             $policy->tenant_id = $tenant->id;
             $policy->status = '1';
@@ -225,31 +217,27 @@ class UserSeeder extends Seeder
         }
 
         if (!$employee) {
-
-            $user3 = new User;
+            $user3 = new User();
             $user3->email = 'employee@employee.com';
             $user3->password = bcrypt('12345678'); // Use bcrypt to hash the password
             $user3->status = '1';
             $user3->save();
 
-            $employee = new Employee;
+            $employee = new Employee();
             $employee->name = 'new employee';
             $employee->user_id = $user3->id;
             $employee->tenant_id = $tenant->id;
             $employee->status = '1';
             $employee->save();
 
-
             $employeeRole = Role::where(['name' => 'employee', 'guard_name' => 'sanctum'])->first();
             if (!$employeeRole) {
-                $employeeRole =  Role::create(['name' => 'employee', 'guard_name' => 'sanctum']);
+                $employeeRole = Role::create(['name' => 'employee', 'guard_name' => 'sanctum']);
             }
         }
 
-
-
         if (!$user) {
-            $user = new User;
+            $user = new User();
             $user->email = 'admin@admin.com';
             $user->password = bcrypt('12345678'); // Use bcrypt to hash the password
             $user->status = '1';
@@ -266,7 +254,8 @@ class UserSeeder extends Seeder
     /**
      * Create a new user type.
      *
-     * @param  int  $userId
+     * @param int $userId
+     *
      * @return void
      */
     // private function createTenant(int $userId)
@@ -276,7 +265,6 @@ class UserSeeder extends Seeder
     //     $newtenant->user_id = $userId;
     //     $newtenant->save();
     // }
-
 
     private function createpermissionifnotexits($name, $guardname)
     {

@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Policy extends Model
 {
-
     use SoftDeletes;
     use HasFactory;
     protected $fillable = [
@@ -21,7 +20,7 @@ class Policy extends Model
         'early_departure_allow',
         'late_deduction',
         'early_deduction',
-        'status'
+        'status',
     ];
 
     //gives the defualt value of status as 1
@@ -33,10 +32,12 @@ class Policy extends Model
     {
         return $this->belongsTo(Tenant::class);
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function duties()
     {
         return $this->hasMany(Duty::class);

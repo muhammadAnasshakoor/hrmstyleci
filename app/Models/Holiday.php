@@ -16,14 +16,13 @@ class Holiday extends Model
         'name',
         'starting_date',
         'ending_date',
-        'status'
+        'status',
     ];
 
-          //gives the defualt value of status as 1
-          protected $attributes = [
-            'status' => '1',
-        ];
-        
+    //gives the defualt value of status as 1
+    protected $attributes = [
+        'status' => '1',
+    ];
 
     public function company()
     {

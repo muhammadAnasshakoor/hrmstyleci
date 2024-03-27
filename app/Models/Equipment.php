@@ -15,14 +15,14 @@ class Equipment extends Model
         'title',
         'user_id',
         'tenant_id',
-        'status'
+        'status',
     ];
 
     //gives the defualt value of status as 1
     protected $attributes = [
         'status' => '1',
     ];
-    
+
     protected $table = 'equipments';
 
     public function duties()

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use App\Models\Holiday;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateHolidayRequest;
+use App\Models\Company;
+use App\Models\Holiday;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -28,6 +28,7 @@ class HolidayController extends Controller
      *      summary="Get All active holidays.Permission required = holiday.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Holiday"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -42,12 +43,13 @@ class HolidayController extends Controller
         $this->middleware('checkPermission:holiday.update')->only('update');
         $this->middleware('checkPermission:holiday.delete')->only('delete');
     }
+
     public function index()
     {
         $user = auth::user();
-        if (!($user->tenant)) {
+        if (!$user->tenant) {
             return response()->json([
-                'message' => 'Only Tenant can access it'
+                'message' => 'Only Tenant can access it',
             ]);
         }
         $tenant_id = $user->tenant->id;
@@ -55,13 +57,12 @@ class HolidayController extends Controller
             ->where('status', '1')
             ->with('company')
             ->get();
+
         return response()->json([
-            'message' => 'Active Holidays retrieved successfully',
-            'Holidays' => $holidays
+            'message'  => 'Active Holidays retrieved successfully',
+            'Holidays' => $holidays,
         ]);
     }
-
-
 
     /**
      * @OA\Get(
@@ -69,6 +70,7 @@ class HolidayController extends Controller
      *      summary="Get All inactive holidays.Permission required = holiday.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Holiday"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -76,9 +78,9 @@ class HolidayController extends Controller
     public function inactiveHolidays()
     {
         $user = auth::user();
-        if (!($user->tenant)) {
+        if (!$user->tenant) {
             return response()->json([
-                'message' => 'Only Tenant can access it'
+                'message' => 'Only Tenant can access it',
             ]);
         }
         $tenant_id = $user->tenant->id;
@@ -86,11 +88,13 @@ class HolidayController extends Controller
             ->where('status', '0')
             ->with('company')
             ->get();
+
         return response()->json([
-            'message' => 'Inactive Holidays retrieved successfully',
-            'Holidays' => $holidays
+            'message'  => 'Inactive Holidays retrieved successfully',
+            'Holidays' => $holidays,
         ]);
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -100,6 +104,7 @@ class HolidayController extends Controller
      *      summary="Get All companies that are active.Permission required = holiday.create",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Holiday"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -114,8 +119,8 @@ class HolidayController extends Controller
         $companies = Company::where('status', '1')->where('tenant_id', $tenant_id)->get();
 
         return response()->json([
-            'message' => 'This is the list of all active  companies',
-            'Companies' => $companies
+            'message'   => 'This is the list of all active  companies',
+            'Companies' => $companies,
         ]);
     }
 
@@ -128,11 +133,15 @@ class HolidayController extends Controller
      *     summary="Create a new holiday.Permission required = holiday.update",
      *     description="This endpoint creates a new holiday.",
      *     tags={"Holiday"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="company_id",
      *                     type="number",
@@ -160,16 +169,17 @@ class HolidayController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="holiday created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )fd
      */
-
     public function store(CreateHolidayRequest $holiday_request)
     // public function update()
     {
         DB::beginTransaction();
+
         try {
             $holiday_data = $holiday_request->validated();
             $Logged_in_user = auth::user();
@@ -181,37 +191,36 @@ class HolidayController extends Controller
 
             if ($ending_date->lessThan($starting_date)) {
                 return response()->json([
-                    "error"=> "Invalid Date Range",
-                    "hint"=> "Please ensure that the starting date comes before the ending date and try again."
+                    'error'=> 'Invalid Date Range',
+                    'hint' => 'Please ensure that the starting date comes before the ending date and try again.',
                 ], 400);
             }
 
-            $existing_holiday = Holiday::where('tenant_id',$tenant_id)
+            $existing_holiday = Holiday::where('tenant_id', $tenant_id)
             ->WhereBetween('starting_date', [$starting_date, $ending_date])
             ->orWhereBetween('ending_date', [$starting_date, $ending_date])
             ->exists();
 
-            if($existing_holiday){
+            if ($existing_holiday) {
                 return response()->json([
                     'message' => 'The provided date range overlaps with an existing holiday. Please choose different dates.',
                 ]);
             }
 
-
-
             $new_holiday = Holiday::create($holiday_data);
 
-
             DB::commit();
+
             return response()->json([
                 'message' => 'Holiday is created successfully',
-                'holiday' => $new_holiday
+                'holiday' => $new_holiday,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -231,31 +240,35 @@ class HolidayController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the holiday ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function show(Holiday $holiday)
     {
         DB::beginTransaction();
+
         try {
             $holiday->company;
             DB::commit();
+
             return response()->json([
                 'message' => 'This is the required holiday',
-                'holiday' => $holiday
+                'holiday' => $holiday,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -277,22 +290,28 @@ class HolidayController extends Controller
      *     summary="Update the holiday.Permission required = holiday.update",
      *     description="This endpoint updates a holiday.",
      *     tags={"Holiday"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the holiday to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="company_id",
      *                     type="number",
@@ -326,6 +345,7 @@ class HolidayController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="holiday created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
@@ -334,20 +354,23 @@ class HolidayController extends Controller
     public function update(CreateHolidayRequest $holiday_request, Holiday $holiday)
     {
         DB::beginTransaction();
+
         try {
             $holiday_data = $holiday_request->validated();
             $holiday->update($holiday_data);
             DB::commit();
+
             return response()->json([
                 'message' => 'The holiday is updated',
-                'holiday' => $holiday
+                'holiday' => $holiday,
 
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -368,11 +391,13 @@ class HolidayController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the holiday to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -380,17 +405,20 @@ class HolidayController extends Controller
     public function destroy(Holiday $holiday)
     {
         DB::beginTransaction();
+
         try {
             $holiday->delete();
             DB::commit();
+
             return response()->json([
                 'message' => 'The holiday is deleted successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }

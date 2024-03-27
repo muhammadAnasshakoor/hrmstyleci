@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
 class ProductController extends BaseController
 {
     public function index(): JsonResponse
@@ -15,14 +16,14 @@ class ProductController extends BaseController
 
         return response()->json(['data' => ProductResource::collection($products)], 200);
     }
-    
+
     public function store(Request $request): JsonResponse
     {
         $input = $request->all();
 
         $validator = Validator::make($input, [
-            'name' => 'required',
-            'detail' => 'required'
+            'name'   => 'required',
+            'detail' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -50,8 +51,8 @@ class ProductController extends BaseController
         $input = $request->all();
 
         $validator = Validator::make($input, [
-            'name' => 'required',
-            'detail' => 'required'
+            'name'   => 'required',
+            'detail' => 'required',
         ]);
 
         if ($validator->fails()) {

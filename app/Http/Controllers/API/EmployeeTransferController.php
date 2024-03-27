@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Duty;
-use App\Models\Media;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon; // Add this line
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateDutyRequest;
 use App\Http\Requests\EmployeeTransferRequest;
+use App\Models\Company;
+use App\Models\Duty;
 use App\Models\Employee;
+// Add this line
 use App\Models\EmployeeTransfer;
+use App\Models\Media;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -22,7 +22,6 @@ use App\Models\EmployeeTransfer;
  */
 class EmployeeTransferController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
@@ -33,6 +32,7 @@ class EmployeeTransferController extends Controller
      *      summary="Get All employee transfers.Permission required = employee-transfer.list",
      *      description="This endpoint retrieves information about employee transfers.",
      *      tags={"Employee Transfer"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -66,7 +66,7 @@ class EmployeeTransferController extends Controller
             $from_duty_name = Duty::where('id', $from_duty_id)->value('name');
             $to_duty_name = Duty::where('id', $to_duty_id)->value('name');
 
-            $employee_transfer->from_company_id =     $from_company_name;
+            $employee_transfer->from_company_id = $from_company_name;
             $employee_transfer->to_company_id = $to_company_name;
             $employee_transfer->from_duty_id = $from_duty_name;
             $employee_transfer->to_duty_id = $to_duty_name;
@@ -74,8 +74,8 @@ class EmployeeTransferController extends Controller
 
         return response()->json(
             [
-                'message' => 'This is the list of all employee transfers',
-                'Employee transfers' => $employee_transfers
+                'message'            => 'This is the list of all employee transfers',
+                'Employee transfers' => $employee_transfers,
             ]
         );
     }
@@ -91,30 +91,34 @@ class EmployeeTransferController extends Controller
      * Store a newly created resource in storage.
      */
 
-
-
     /**
      * @OA\Post(
      *     path="/api/employee-transfer/{previous_duty}",
      *     summary="Create a new employee transfer.Permission required = employee-transfer.store",
      *     description="This endpoint creates a new employee transfer.",
      *     tags={"Employee Transfer"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the duty to be transfered",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="number",
@@ -139,7 +143,6 @@ class EmployeeTransferController extends Controller
      *                     example="This duty is assigned to this duty",
      *                     description="The note of the duty =>nullable"
      *                 ),
-
      *  @OA\Property(
      *                     property="joining_date",
      *                     type="date",
@@ -167,37 +170,23 @@ class EmployeeTransferController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="duty created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )s
      */
-
-
-
-
-
-
-
-
-
-
-
-
     public function store(CreateDutyRequest $duty_request, EmployeeTransferRequest $transfer_request, Duty $previous_duty)
     {
-
-
         DB::beginTransaction();
-        try {
 
+        try {
             // Update the previous duty record to inactive it
             $current_date = now()->format('Y-m-d');
             $previous_duty->update([
-                'status' => 0,
-                'ended_at' => $current_date
+                'status'   => 0,
+                'ended_at' => $current_date,
             ]);
-
 
             // getting the data of previous duty
             $previous_duty_id = $previous_duty->id;
@@ -211,8 +200,8 @@ class EmployeeTransferController extends Controller
             $loggedin_tenant = $loggedin_user->tenant;
             $loggedin_tenantid = $loggedin_tenant->id;
             $additional_duty_data = [
-                'user_id' => $loggedin_user->id,
-                'tenant_id' =>   $loggedin_tenantid
+                'user_id'   => $loggedin_user->id,
+                'tenant_id' => $loggedin_tenantid,
             ];
             $merged_duty_data = array_merge($duty_data, $additional_duty_data);
 
@@ -229,14 +218,14 @@ class EmployeeTransferController extends Controller
             $transfer_data = $transfer_request->validated();
 
             $additional_transfer_data = [
-                'tenant_id' =>  $loggedin_tenantid,
-                'employee_id' => $previous_employee_id,
-                'from_company_id' =>  $previous_company_id,
-                'to_company_id' => $new_duty->company_id,
-                'from_duty_id' => $previous_duty_id,
-                'to_duty_id' => $new_duty->id,
-                'started_at' => $previous_joining_date,
-                'ended_at' => $current_date
+                'tenant_id'       => $loggedin_tenantid,
+                'employee_id'     => $previous_employee_id,
+                'from_company_id' => $previous_company_id,
+                'to_company_id'   => $new_duty->company_id,
+                'from_duty_id'    => $previous_duty_id,
+                'to_duty_id'      => $new_duty->id,
+                'started_at'      => $previous_joining_date,
+                'ended_at'        => $current_date,
 
             ];
 
@@ -245,20 +234,21 @@ class EmployeeTransferController extends Controller
             $new_employee_transfer = EmployeeTransfer::create($merged_transfer_data);
 
             DB::commit();
+
             return response()->json([
-                'message' => 'The employee has been transfered to the new duty while the previous duty has been inactivated',
+                'message'           => 'The employee has been transfered to the new duty while the previous duty has been inactivated',
                 'Employee transfer' => $new_employee_transfer,
-                'new duty' => $new_duty
+                'new duty'          => $new_duty,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
-
 
     /**
      * @OA\Get(
@@ -272,20 +262,20 @@ class EmployeeTransferController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the duty to be transfered ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function newDutyForm(Duty $duty)
     {
-        $duty->load('employee:id,name,emirates_id', 'policy:id,name', 'company:id,name', 'equipments:id,title',);
+        $duty->load('employee:id,name,emirates_id', 'policy:id,name', 'company:id,name', 'equipments:id,title');
 
         // getting the employee and the company based on the ids in the duty
         $employee = Employee::where('id', $duty->employee_id)->first();
@@ -308,13 +298,14 @@ class EmployeeTransferController extends Controller
         }
 
         return response()->json([
-            'message' => 'This is the data of the duty ,with employee ,company,policy and equipment data',
-            'duty' => $duty,
+            'message'                => 'This is the data of the duty ,with employee ,company,policy and equipment data',
+            'duty'                   => $duty,
             'Employee Profile image' => $profile_media_url,
-            'Company logo' =>   $logo_media_url
+            'Company logo'           => $logo_media_url,
 
         ]);
     }
+
     /**
      * Display the specified resource.
      */
@@ -344,6 +335,5 @@ class EmployeeTransferController extends Controller
      */
     public function destroy(string $id)
     {
-       
     }
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceReport;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -21,6 +20,7 @@ class DashboardController extends Controller
      *      summary="Get the tenant report.Permission required = dashboard.list",
      *      description="This endpoint retrieves all the companies and their duties.",
      *      tags={"Dashboard"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -30,9 +30,9 @@ class DashboardController extends Controller
         // Apply middleware to all methods in the controller
         $this->middleware('checkPermission:dashboard.list')->only('dashboard');
     }
+
     public function dashboard()
     {
-
         $current_date = now()->format('Y-m-d');
         $user = auth::user();
 
@@ -40,9 +40,9 @@ class DashboardController extends Controller
             $tenant = $user->tenant;
             $tenant_id = $tenant->id;
 
-            if (!($tenant)) {
+            if (!$tenant) {
                 return response()->json([
-                    'message' => 'Oops! no tenant could be found'
+                    'message' => 'Oops! no tenant could be found',
                 ]);
             }
             $total_companies = $tenant->companies()->count();
@@ -83,23 +83,22 @@ class DashboardController extends Controller
 
             return response()->json([
                 'data' => [
-                    'user' => $user,
-                    'Total companies' => $total_companies,
-                    'Active companies' => $active_companies,
+                    'user'               => $user,
+                    'Total companies'    => $total_companies,
+                    'Active companies'   => $active_companies,
                     'Inactive Companies' => $inactive_companies,
-                    'Total Employees' =>  $total_employees,
-                    'working employee' => $working_employees,
+                    'Total Employees'    => $total_employees,
+                    'working employee'   => $working_employees,
                     'reserved employees' => $reserved_employees,
-                    'Present Employees' => $present_employees,
-                    'Absent Employees' => $absent_employees,
-                    'Late Employees' => $late_employees,
-                    'leave Employees' => $leave_employees,
-                ]
+                    'Present Employees'  => $present_employees,
+                    'Absent Employees'   => $absent_employees,
+                    'Late Employees'     => $late_employees,
+                    'leave Employees'    => $leave_employees,
+                ],
             ], 200);
         }
         if ($user->company) {
             $company = $user->company;
-
 
             $active_duties = $company->duties()->where('status', '1')->count();
             $inactive_duties = $company->duties()->where('status', '0')->count();
@@ -122,14 +121,15 @@ class DashboardController extends Controller
                 ->where('company_id', $company_id)
                 ->where('type', 'leave')
                 ->count();
+
             return response()->json([
-                'message' => 'Data fetched successfully',
-                'Active Duties' => $active_duties,
-                'Inactive Duties' => $inactive_duties,
+                'message'           => 'Data fetched successfully',
+                'Active Duties'     => $active_duties,
+                'Inactive Duties'   => $inactive_duties,
                 'Present Employees' => $present_employees,
-                'Absent Employees' => $absent_employees,
-                'Late Employees' => $late_employees,
-                'leave Employees' => $leave_employees,
+                'Absent Employees'  => $absent_employees,
+                'Late Employees'    => $late_employees,
+                'leave Employees'   => $leave_employees,
 
             ]);
         }
@@ -157,13 +157,14 @@ class DashboardController extends Controller
                 ->where('employee_id', $employee_id)
                 ->where('type', 'leave')
                 ->count();
+
             return response()->json([
-                'message' => 'Data retrived successfully',
+                'message'                 => 'Data retrived successfully',
                 'Total attendance marked' => $attendances,
-                'Present' => $present_attendances,
-                'Absent' => $absent_attendances,
-                'Late' => $late_attendances,
-                'Leave' => $leave_attendances
+                'Present'                 => $present_attendances,
+                'Absent'                  => $absent_attendances,
+                'Late'                    => $late_attendances,
+                'Leave'                   => $leave_attendances,
             ]);
         }
     }

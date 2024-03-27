@@ -2,11 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class Handler extends ExceptionHandler
 {
@@ -34,8 +32,9 @@ class Handler extends ExceptionHandler
     /**
      * Convert an authentication exception into an unauthenticated response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Auth\AuthenticationException  $exception
+     * @param \Illuminate\Http\Request                 $request
+     * @param \Illuminate\Auth\AuthenticationException $exception
+     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
      */
     protected function unauthenticated($request, AuthenticationException $exception)
@@ -48,8 +47,9 @@ class Handler extends ExceptionHandler
     /**
      * Convert a validation exception into a JSON response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Validation\ValidationException  $exception
+     * @param \Illuminate\Http\Request                   $request
+     * @param \Illuminate\Validation\ValidationException $exception
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     protected function invalidJson($request, \Illuminate\Validation\ValidationException $exception)
@@ -57,4 +57,3 @@ class Handler extends ExceptionHandler
         return response()->json($exception->errors(), $exception->status);
     }
 }
-

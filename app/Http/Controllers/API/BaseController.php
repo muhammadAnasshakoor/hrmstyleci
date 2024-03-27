@@ -1,15 +1,8 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller as Controller;
-use OpenApi\Annotations as OA;
-
-use function Laravel\Prompts\warning;
-
+use App\Http\Controllers\Controller;
 
 class BaseController extends Controller
 {
@@ -26,7 +19,6 @@ class BaseController extends Controller
             'message' => $message,
         ];
 
-
         return response()->json($response, 200);
     }
 
@@ -42,11 +34,9 @@ class BaseController extends Controller
             'message' => $error,
         ];
 
-
         if (!empty($errorMessages)) {
             $response['data'] = $errorMessages;
         }
-
 
         return response()->json($response, $code);
     }

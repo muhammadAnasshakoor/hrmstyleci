@@ -11,14 +11,12 @@ class Resignation extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $fillable = [
+        'tenant_id',
+        'duty_id',
+        'equipment_status',
+        'note',
+    ];
 
-     protected $fillable = [
-        'tenant_id' ,
-        'duty_id' ,
-        'equipment_status' ,
-        'note'
-     ];
-
-     
-     protected $table = 'resignations';
+    protected $table = 'resignations';
 }

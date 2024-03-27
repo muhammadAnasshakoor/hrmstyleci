@@ -15,15 +15,21 @@ class Media extends Model
         'user_id',
         'media_name',
         'media_path',
-        'extension'
+        'extension',
     ];
-    public function tenant(){
-       return $this->hasOne(Tenant::class);
+
+    public function tenant()
+    {
+        return $this->hasOne(Tenant::class);
     }
-     public function company(){
-       return $this->hasOne(Company::class);
-    } 
-    public function employee(){
-       return $this->hasOne(Employee::class);
+
+    public function company()
+    {
+        return $this->hasOne(Company::class);
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
     }
 }

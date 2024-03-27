@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Models;
 
-use App\Http\Controllers\API\SubscriberController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,8 +18,8 @@ class SubscriptionPlan extends Model
         'status',
     ];
 
-     //gives the defualt value of status as 1
-     protected $attributes = [
+    //gives the defualt value of status as 1
+    protected $attributes = [
         'status' => '1',
     ];
 
@@ -28,7 +28,8 @@ class SubscriptionPlan extends Model
         return $this->hasMany(Subscriber::class);
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 }

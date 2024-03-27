@@ -3,19 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Events\NotifyUser;
-use App\Models\Designation;
-use App\Models\User;
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-
-
-use App\Http\Requests\CreateDesignationRequest;
 use App\Http\Requests\CreateNotificationRequest;
+use App\Models\Company;
 use App\Models\Employee;
-use PDO;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {
@@ -32,23 +26,23 @@ class NotificationController extends Controller
      */
     public function create()
     {
-      $user = auth::user();
-      $tenant_id = $user->tenant->id;
+        $user = auth::user();
+        $tenant_id = $user->tenant->id;
 
-      $employees = Employee::where('tenant_id',$tenant_id)
-      ->where('status','1')
-      ->select('name','id','emirates_id')
-      ->get();
-      $companies = Company::where('tenant_id',$tenant_id)
-      ->where('status','1')
-      ->select('name','id')
-      ->get();
+        $employees = Employee::where('tenant_id', $tenant_id)
+        ->where('status', '1')
+        ->select('name', 'id', 'emirates_id')
+        ->get();
+        $companies = Company::where('tenant_id', $tenant_id)
+        ->where('status', '1')
+        ->select('name', 'id')
+        ->get();
 
-      return response()->json([
-        'message' => 'Data fetched successfully',
-        'Employees' => $employees,
-        'Companies' => $companies
-      ]);
+        return response()->json([
+            'message'   => 'Data fetched successfully',
+            'Employees' => $employees,
+            'Companies' => $companies,
+        ]);
     }
 
     /**
@@ -57,17 +51,18 @@ class NotificationController extends Controller
     public function store(CreateNotificationRequest $request)
     {
         DB::beginTransaction();
+
         try {
             $user = auth::user();
             $request->validated();
             $tenant_id = $user->tenant->id;
             $data = [
-                'title' => $request->input('title'),
-                'summary' => $request->input('summary'),
-                'description' => $request->input('description'),
-                'tenant_id' => $tenant_id,
+                'title'         => $request->input('title'),
+                'summary'       => $request->input('summary'),
+                'description'   => $request->input('description'),
+                'tenant_id'     => $tenant_id,
                 'companies_ids' => null,
-                'employees_ids' => null
+                'employees_ids' => null,
             ];
             if ($request->input('companies_ids') != null) {
                 $companies_ids = $request->input('companies_ids', []);
@@ -84,15 +79,17 @@ class NotificationController extends Controller
             event(new NotifyUser($data));
 
             DB::commit();
+
             return response()->json([
-                'message' => "Success! The notification has been sent.",
-                'data' => $data
+                'message' => 'Success! The notification has been sent.',
+                'data'    => $data,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -102,8 +99,6 @@ class NotificationController extends Controller
      */
     public function show(string $id)
     {
-
-
     }
 
     /**

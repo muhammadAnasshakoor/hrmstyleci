@@ -14,7 +14,7 @@ class Designation extends Model
         'user_id',
         'tenant_id',
         'title',
-        'status'
+        'status',
     ];
 
     //gives the defualt value of status as 1
@@ -22,13 +22,10 @@ class Designation extends Model
         'status' => '1',
     ];
 
-
     public function employees()
     {
         return $this->hasMany(Employee::class);
     }
-
-
 
     public function duties()
     {

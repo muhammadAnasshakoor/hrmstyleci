@@ -1,15 +1,14 @@
 <?php
+
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
-use App\Traits\ValidationErrorTrait; // Import the trait correctly
+use App\Traits\ValidationErrorTrait;
+use Illuminate\Foundation\Http\FormRequest; // Import the trait correctly
 
 class CreateSubscriptionPlanRequest extends FormRequest
 {
-    use ValidationErrorTrait;// Use the trait correctly
+    use ValidationErrorTrait; // Use the trait correctly
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,12 +25,12 @@ class CreateSubscriptionPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'nullable',
-            'title' => 'required',
-            'price' => 'required',
+            'user_id'          => 'nullable',
+            'title'            => 'required',
+            'price'            => 'required',
             'discounted_price' => 'required',
-            'description' => 'nullable',
-            'status' => 'nullable|regex:/^[01]$/',
+            'description'      => 'nullable',
+            'status'           => 'nullable|regex:/^[01]$/',
         ];
     }
 }

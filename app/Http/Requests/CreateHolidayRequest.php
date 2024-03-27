@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Requests;
-use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateHolidayRequest extends FormRequest
@@ -23,20 +24,20 @@ class CreateHolidayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tenant_id' => 'nullable',
-            'name' => 'required|string',
+            'tenant_id'     => 'nullable',
+            'name'          => 'required|string',
             'starting_date' => 'required|date_format:Y-m-d',
-            'ending_date' => 'required|date_format:Y-m-d',
-            'status' => 'nullable|regex:/^[01]$/',
+            'ending_date'   => 'required|date_format:Y-m-d',
+            'status'        => 'nullable|regex:/^[01]$/',
 
         ];
     }
+
     protected function failedValidation(Validator $validator)
     {
-
         throw new HttpResponseException(response()->json([
             'message' => 'Validation failed',
-            'errors' => $validator->errors(),
+            'errors'  => $validator->errors(),
         ], 422));
     }
 }

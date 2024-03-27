@@ -1,22 +1,15 @@
 <?php
+
 namespace App\Http\Controllers\API;
 
-
-
 use App\Http\Controllers\Controller;
-use App\Models\Duty;
+use App\Http\Requests\ResignationRequest;
 use App\Models\Employee;
-use App\Models\Tenant;
+use App\Models\Resignation;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Resignation;
-use App\Models\Guard;
-use App\Models\Company;
-use App\Http\Requests\ResignationRequest;
-
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -26,24 +19,23 @@ use App\Http\Requests\ResignationRequest;
  */
 class ResignationController extends Controller
 {
-
     /**
      * @OA\Get(
      *      path="/api/resignation",
      *      summary="Get All active resignations.Permission required = resignation.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Resignation"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
-        $this->middleware('checkPermission:resignation.list')->only('index','inactiveResignations');
+        $this->middleware('checkPermission:resignation.list')->only('index', 'inactiveResignations');
         $this->middleware('checkPermission:resignation.create')->only('create');
-        $this->middleware('checkPermission:resignation.store')->only('store','searchEmployee');
+        $this->middleware('checkPermission:resignation.store')->only('store', 'searchEmployee');
         $this->middleware('checkPermission:resignation.edit')->only('show');
         $this->middleware('checkPermission:resignation.update')->only('update');
         $this->middleware('checkPermission:resignation.delete')->only('delete');
@@ -52,46 +44,49 @@ class ResignationController extends Controller
     public function index()
     {
         $user = auth::user();
-        if (!($user->tenant)) {
+        if (!$user->tenant) {
             return response()->json([
-                'message' => 'you can not access it'
+                'message' => 'you can not access it',
             ]);
         }
         $tenant_id = $user->tenant->id;
         $resignation = Resignation::where('tenant_id', $tenant_id)
-        ->where('status','1')
+        ->where('status', '1')
         ->get();
+
         return response()->json([
-            'message' => 'List of all active employee resignations',
-            'resignations ' => $resignation
+            'message'       => 'List of all active employee resignations',
+            'resignations ' => $resignation,
         ]);
     }
-        /**
+
+    /**
      * @OA\Get(
      *      path="/api/resignation/inactive-resignations",
      *      summary="Get inactive All resignations.Permission required = resignation.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Resignation"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-     public function inactiveResignations()
+    public function inactiveResignations()
     {
         $user = auth::user();
-        if (!($user->tenant)) {
+        if (!$user->tenant) {
             return response()->json([
-                'message' => 'you can not access it'
+                'message' => 'you can not access it',
             ]);
         }
         $tenant_id = $user->tenant->id;
         $resignation = Resignation::where('tenant_id', $tenant_id)
-        ->where('status','0')
+        ->where('status', '0')
         ->get();
+
         return response()->json([
-            'message' => 'List of all inactive employee resignations',
-            'resignations ' => $resignation
+            'message'       => 'List of all inactive employee resignations',
+            'resignations ' => $resignation,
         ]);
     }
 
@@ -101,11 +96,15 @@ class ResignationController extends Controller
      *      summary="GET The Employee.Permission required = resignation.store",
      *      description="This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
      *      tags={"Resignation"},
+     *
      *      @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="emirates_id",
      *                     type="number",
@@ -115,11 +114,11 @@ class ResignationController extends Controller
      *             )
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
     public function searchEmployee(Request $request)
     {
         $emirates_id = $request->input('emirates_id');
@@ -135,17 +134,15 @@ class ResignationController extends Controller
         if ($employee == null) {
             return response()->json([
                 'message' => 'Oops! No employee found with the provided Emirates ID.',
-                'status' => 'error'
+                'status'  => 'error',
             ], 404);
         } else {
             return response()->json([
-                'message' => 'This is your required employee',
-                'employee' => $employee
+                'message'  => 'This is your required employee',
+                'employee' => $employee,
             ]);
         }
     }
-
-
 
     /**
      * @OA\Post(
@@ -153,25 +150,27 @@ class ResignationController extends Controller
      *     summary="Create a new resignation.Permission required = resignation.store",
      *     description="This endpoint creates a new resignation.",
      *     tags={"Resignation"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="employee_id",
      *                     type="number",
      *                     example="1",
      *                     description="The employee_id of the employee needed to be resigned => required"
      *                 ),
-     *
      *  @OA\Property(
      *                     property="reason",
      *                     type="text",
      *                     example="This is my reason",
      *                     description="The reason of the resignation =>nullable"
      *                 ),
-     *
      *  @OA\Property(
      *                     property="equipment_status",
      *                     type="string",
@@ -181,23 +180,24 @@ class ResignationController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="resignation created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )fd
      */
-
     public function store(ResignationRequest $resignation_request)
     {
         DB::beginTransaction();
+
         try {
             $resignation_request = $resignation_request->validated();
             $loggedin_user = auth::user();
             $loggedin_tenant = $loggedin_user->tenant;
             $loggedin_tenant_id = $loggedin_tenant->id;
             $AdditionaldutyData = [
-                'user_id' => $loggedin_user->id,
-                'tenant_id' => $loggedin_tenant_id
+                'user_id'   => $loggedin_user->id,
+                'tenant_id' => $loggedin_tenant_id,
             ];
 
             $resignation_request = $resignation_request->validated();
@@ -206,7 +206,6 @@ class ResignationController extends Controller
             $duty = $employee->duties()->where('status', 1)->first();
 
             if ($duty->isNotEmpty()) {
-
                 $duty->status = 0;
                 $duty->update();
             }
@@ -219,28 +218,30 @@ class ResignationController extends Controller
 
                 // Submit Resignation
                 $resignation = Resignation::create([
-                    'tenant_id' => $loggedin_tenant_id,
-                    'employee_id' => $resignation_request->employee_id,
-                    'duty_id ' => $duty_id,
-                    'note ' => $resignation_request->note,
-                    'equipment_status ' => $resignation_request->equipment_status
+                    'tenant_id'         => $loggedin_tenant_id,
+                    'employee_id'       => $resignation_request->employee_id,
+                    'duty_id '          => $duty_id,
+                    'note '             => $resignation_request->note,
+                    'equipment_status ' => $resignation_request->equipment_status,
                 ]);
 
                 DB::commit();
+
                 return response()->json([
                     'message' => 'Resignation has been submitted successfully',
-                    'data' => $resignation
+                    'data'    => $resignation,
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Oops! No employee could be found'
+                    'message' => 'Oops! No employee could be found',
                 ]);
             }
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
         }
     }
@@ -257,31 +258,35 @@ class ResignationController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the resignation to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function destroy(Resignation $resignation)
     {
         DB::beginTransaction();
+
         try {
             $resignation->delete();
             DB::commit();
+
             return response()->json([
-                'message' => 'Resignation record deleted successfully'
+                'message' => 'Resignation record deleted successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'There is an error on deleting resignation',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ]);
         }
     }

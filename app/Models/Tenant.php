@@ -27,19 +27,17 @@ class Tenant extends Model
         'status',
     ];
 
-
-
     //gives the defualt value of status as 1
     protected $attributes = [
         'status' => '1',
     ];
-
 
     // defining the relations
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function media()
     {
         return $this->belongsTo(Media::class);
@@ -54,34 +52,42 @@ class Tenant extends Model
     {
         return $this->hasMany(Equipment::class);
     }
+
     public function designations()
     {
         return $this->hasMany(Designation::class);
     }
+
     public function employees()
     {
         return $this->hasMany(Employee::class);
     }
+
     public function policies()
     {
         return $this->hasMany(Policy::class);
     }
+
     public function duties()
     {
         return $this->hasMany(Duty::class);
     }
+
     public function employeeTransfers()
     {
         return $this->hasMany(EmployeeTransfer::class);
     }
+
     public function attendanceRosters()
     {
         return $this->hasMany(AttendanceRoster::class);
     }
+
     public function holidays()
     {
         return $this->hasMany(Holiday::class);
     }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
@@ -96,6 +102,7 @@ class Tenant extends Model
     {
         return $this->hasOne(Subscriber::class);
     }
+
     public function leaves()
     {
         return $this->hasMany(Leave::class);

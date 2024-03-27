@@ -2,25 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Media;
-use Spatie\Permission\Models\Role;
-use App\Models\Tenant;
-use App\Models\Employee;
 use App\Models\Attendance;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\CreateCompanyRequest;
-use App\Http\Requests\CreateUserRequest;
 use App\Models\AttendanceReport;
-use App\Models\User_type;
-use Carbon\Carbon;
-use Carbon\CarbonInterval;
-
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Tag(
@@ -28,13 +16,11 @@ use Carbon\CarbonInterval;
  *     description="Handling the crud of attendance Report in it."
  * )
  */
-
 class AttendanceReportController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
@@ -66,18 +52,21 @@ class AttendanceReportController extends Controller
     {
     }
 
-
     /**
      * @OA\post(
      *      path="/api/attendance-periodic-report/get-employee",
      *      summary="GET The Employee.Permission required = attendance-report.list",
      *      description="This endpoint gives a specific employee. You just need to enter the emirates id of the employee, and it will return you the employee.",
      *      tags={"Attendance Report"},
+     *
      *      @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="emirates_id",
      *                     type="number",
@@ -87,16 +76,16 @@ class AttendanceReportController extends Controller
      *             )
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized")
      * )
      */
-
     public function GetEmployee(Request $request)
     {
         $emirates_id = $request->input('emirates_id');
         $loggedin_user = auth::user();
-        
+
         $loggedInTenant = $loggedin_user->tenant;
         $loggedInTenantId = $loggedInTenant->id;
 
@@ -106,18 +95,15 @@ class AttendanceReportController extends Controller
         if ($employee == null) {
             return response()->json([
                 'message' => 'Oops! No employee found with the provided Emirates ID.',
-                'status' => 'error'
+                'status'  => 'error',
             ], 404);
         } else {
             return response()->json([
-                'message' => 'This is your required employee',
-                'Employee' => $employee
+                'message'  => 'This is your required employee',
+                'Employee' => $employee,
             ]);
         }
     }
-
-
-
 
     /**
      * @OA\Post(
@@ -125,12 +111,15 @@ class AttendanceReportController extends Controller
      *     summary="GET attendance-periodic-report.Permission required = attendance-report.list",
      *     description="This endpoint get  attendance-periodic-report.",
      *     tags={"Attendance Report"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
-
+     *
      *                 @OA\Property(
      *                     property="from_date",
      *                     type="date",
@@ -152,19 +141,19 @@ class AttendanceReportController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="attendance-daily-report created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )fd
      */
-
     public function periodicReport(Request $request)
     {
         try {
             $user = auth::user();
             $data = $request->validate([
-                'from_date' => 'required|date_format:Y-m-d',
-                'to_date' => 'required|date_format:Y-m-d',
+                'from_date'   => 'required|date_format:Y-m-d',
+                'to_date'     => 'required|date_format:Y-m-d',
                 'employee_id' => 'nullable|numeric',
             ]);
 
@@ -172,7 +161,7 @@ class AttendanceReportController extends Controller
             $end_date = $data['to_date'];
 
             $employee_id = $data['employee_id'];
-            if($user->employee){
+            if ($user->employee) {
                 $employee_id = $user->employee->id;
             }
             // Retrieve attendance record for the current date and employee
@@ -182,26 +171,31 @@ class AttendanceReportController extends Controller
 
             return response()->json([
                 'message' => 'Employee report generated successfully',
-                'report' => $attendance
+                'report'  => $attendance,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error generating report',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * @OA\Post(
      *     path="/api/attendance-daily-report",
      *     summary="GET attendance-daily-report.Permission required = attendance-report.list",
      *     description="This endpoint gets attendance-daily-report.",
      *     tags={"Attendance Report"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="date",
      *                     type="date",
@@ -211,21 +205,18 @@ class AttendanceReportController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="attendance-daily-report created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )fd
      */
-
-
     public function dailyReport(Request $request)
     {
         try {
-
             $date = $request->validate([
                 'date' => 'required|date_format:Y-m-d',
             ]);
-
 
             $user = Auth::user();
             if ($user->company) {
@@ -243,7 +234,7 @@ class AttendanceReportController extends Controller
                     ->where('employee_id', $employee_id)->get();
             } else {
                 return response()->json([
-                    'message' => 'You can not access it'
+                    'message' => 'You can not access it',
                 ]);
             }
             // Retrieve all employees with their associated rosters, duties, companies, and holidays
@@ -251,12 +242,12 @@ class AttendanceReportController extends Controller
             // Return the report
             return response()->json([
                 'message' => 'Employee report generated successfully',
-                'report' => $attendances
+                'report'  => $attendances,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error generating report',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -264,6 +255,7 @@ class AttendanceReportController extends Controller
     public function searchEmployee()
     {
     }
+
     public function show(string $id)
     {
         //

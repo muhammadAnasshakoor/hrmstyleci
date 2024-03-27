@@ -19,17 +19,14 @@ class Duty extends Model
         'note',
         'joining_date',
         'status',
-        'ended_at'
+        'ended_at',
     ];
 
+    //gives the defualt value of status as 1
+    protected $attributes = [
+        'status' => '1',
+    ];
 
-          //gives the defualt value of status as 1
-          protected $attributes = [
-            'status' => '1',
-        ];
-
-
-        
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -54,9 +51,9 @@ class Duty extends Model
     {
         return $this->belongsTo(Policy::class);
     }
+
     public function equipments()
     {
         return $this->belongsToMany(Equipment::class, 'duty_equipment');
     }
-
 }

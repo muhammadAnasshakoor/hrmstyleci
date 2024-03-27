@@ -22,6 +22,7 @@ class EmployeeTransfer extends Model
         'ended_at',
         'reason',
     ];
+
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);

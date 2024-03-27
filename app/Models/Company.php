@@ -25,27 +25,29 @@ class Company extends Model
         'logo_media_id',
         'document_media_id',
         'note',
-        'status'
+        'status',
     ];
 
-      //gives the defualt value of status as 1
+    //gives the defualt value of status as 1
     protected $attributes = [
         'status' => '1',
     ];
-
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
+
     public function media()
     {
         return $this->belongsTo(Media::class);
     }
+
     public function holidays()
     {
         return $this->hasMany(Holiday::class);
@@ -55,6 +57,7 @@ class Company extends Model
     {
         return $this->hasMany(Duty::class);
     }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);

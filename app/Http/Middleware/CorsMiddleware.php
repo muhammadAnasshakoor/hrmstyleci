@@ -8,7 +8,6 @@ class CorsMiddleware
 {
     public function handle($request, Closure $next)
     {
-
         $response = $next($request);
         // Allow any origin
         $response->headers->set('Access-Control-Allow-Origin', '*');
@@ -28,6 +27,7 @@ class CorsMiddleware
         if ($request->is('api/documentation*')) {
             return $response;
         }
+
         return $response;
     }
 }

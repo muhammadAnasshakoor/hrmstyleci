@@ -4,12 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\DB;
-
-
-
 
 /**
  * @OA\Tag(
@@ -36,30 +33,32 @@ class RoleController extends Controller
      *      summary="Get All roles.Permission required = role.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Role"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function index()
     {
         $roles = Role::all();
+
         return response()->json([
             'message' => 'Roles retrieved successfully.',
-            'role' => $roles
+            'role'    => $roles,
         ]);
     }
+
     /**
      * @OA\Get(
      *      path="/api/role/create",
      *      summary="Get All permissions.Permission required = role.create",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Role"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function create()
     {
         $permissions = Permission::all();
@@ -68,9 +67,10 @@ class RoleController extends Controller
             $module = explode('.', $permission->name);
             $chunks[$module[0]][$permission->id] = $permission->name;
         }
+
         return response()->json([
-            'message' => 'Permissions retrieved successfully.',
-            'Permission' => $chunks
+            'message'    => 'Permissions retrieved successfully.',
+            'Permission' => $chunks,
         ]);
     }
 
@@ -80,11 +80,15 @@ class RoleController extends Controller
      *     summary="Create a new role.Permission required = role.store",
      *     description="This endpoint creates a new role.",
      *     tags={"Role"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -100,13 +104,12 @@ class RoleController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="role created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
-
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -120,10 +123,7 @@ class RoleController extends Controller
 
             $role = Role::create(['name' => $request->name, 'guard_name' => 'sanctum']);
 
-
             if ($request->has('permissions')) {
-
-
                 $permission = $request->input('permissions');
                 // Convert permissions string to array
                 $permissions = explode(',', $permission);
@@ -137,39 +137,46 @@ class RoleController extends Controller
 
             return response()->json([
                 'message' => 'Your role has been created with permissions',
-                'role' => $role,
+                'role'    => $role,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
 
             return response()->json([
                 'message' => 'There was an error creating the role',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500); // Use appropriate HTTP status code for error
         }
     }
+
     /**
      * @OA\Patch(
      *     path="/api/role/{id}",
      *     summary="Update the role.Permission required = role.update",
      *     description="This endpoint updates a role.",
      *     tags={"Role"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the role to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -185,14 +192,12 @@ class RoleController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="role created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
-
-
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
@@ -201,7 +206,7 @@ class RoleController extends Controller
             $role = Role::findOrFail($id);
 
             $request->validate([
-                'name' => 'nullable|string',
+                'name'        => 'nullable|string',
                 'permissions' => 'nullable|string', // Changed validation to 'string'
             ]);
 
@@ -220,14 +225,14 @@ class RoleController extends Controller
 
             return response()->json([
                 'message' => 'Your role has been updated with permissions',
-                'role' => $role,
+                'role'    => $role,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
 
             return response()->json([
                 'message' => 'There was an error updating the role',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500); // Use appropriate HTTP status code for error
         }
     }
@@ -244,22 +249,24 @@ class RoleController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the role ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function show(Role $role)
     {
         $role->load('permissions');
+
         return response()->json([
             'message' => 'This is the required role',
-            'Role' => $role
+            'Role'    => $role,
         ]);
     }
 
@@ -275,38 +282,41 @@ class RoleController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the role to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
     public function destroy(Role $role)
     {
         DB::beginTransaction();
+
         try {
             $permissions = $role->permissions()->count();
-             if($permissions > 0 ){
+            if ($permissions > 0) {
                 return response()->json([
-                    'message' => 'Unable to delete role. It is associated with existing permissions.'
+                    'message' => 'Unable to delete role. It is associated with existing permissions.',
                 ]);
-             }
+            }
             $role->delete();
             DB::commit();
+
             return response()->json([
-                'message' => 'The role is deleted'
+                'message' => 'The role is deleted',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There is some error',
 
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

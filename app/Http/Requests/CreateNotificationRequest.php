@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateNotificationRequest extends FormRequest
@@ -23,11 +24,11 @@ class CreateNotificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required',
-            'summary' => 'nullable',
-            'description' => 'nullable',
+            'title'         => 'required',
+            'summary'       => 'nullable',
+            'description'   => 'nullable',
             'companies_ids' => 'nullable',
-            'employees_ids' => 'nullable'
+            'employees_ids' => 'nullable',
         ];
     }
 
@@ -36,7 +37,7 @@ class CreateNotificationRequest extends FormRequest
         // Custom response or throw an exception
         throw new HttpResponseException(response()->json([
             'message' => 'Validation failed',
-            'errors' => $validator->errors(),
+            'errors'  => $validator->errors(),
         ], 422));
     }
 }

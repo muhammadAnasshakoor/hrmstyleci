@@ -13,19 +13,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class CheckSubscriptionExpiryJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
-
-
     public function __construct()
     {
         // $this->user = $user;
@@ -34,12 +33,8 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
     /**
      * Execute the job.
      */
-
     public function handle(): void
     {
-
-
-
         $tenants = Tenant::where('status', '1')->get();
 
         foreach ($tenants as $tenant) {
@@ -67,9 +62,9 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
                         $email = $user->email;
 
                         $data = [
-                            'name' => $tenant->name,
+                            'name'                     => $tenant->name,
                             'subscription_ending_date' => $expiry_date,
-                            'acount_suspention_date' => $acount_suspention_date
+                            'acount_suspention_date'   => $acount_suspention_date,
                         ];
                         if ($current_date == $notification_date) {
                             $mail = new SubscriptionExpiryReminder($data);
@@ -82,10 +77,8 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
                             Mail::to($email)->send($mail);
                         }
 
-
                         if ($current_date == $acount_suspention_date) {
-
-                            $mail = new AcountSuspentionEmail ($data);
+                            $mail = new AcountSuspentionEmail($data);
                             Mail::to($email)->send($mail);
 
                             // logout the tenant and deactivate his acount
@@ -93,9 +86,8 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
                             $user->tokens()->delete();
                             $user->update(['status' => '0']);
                             //logout the employees and deactivate their acount
-                            $employees =  $tenant->employees;
+                            $employees = $tenant->employees;
                             if (count($employees) > 0) {
-
                                 foreach ($employees as $employee) {
                                     $employee_user = $employee->user;
                                     $employee_user->tokens()->delete();
@@ -105,8 +97,6 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
                             //logout the companies and deactivate their acount
                             $companies = $tenant->companies;
                             if (count($companies) > 0) {
-
-
                                 foreach ($companies as $company) {
                                     $company_user = $company->user;
                                     $company_user->tokens()->delete();
@@ -118,6 +108,5 @@ class CheckSubscriptionExpiryJob implements ShouldQueue
                 }
             }
         }
-
     }
 }

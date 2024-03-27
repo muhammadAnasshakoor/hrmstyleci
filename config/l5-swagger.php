@@ -1,9 +1,7 @@
 <?php
-use L5Swagger\Generator;
-
 
 return [
-    'default' => 'default',
+    'default'        => 'default',
     'documentations' => [
         'default' => [
             'api' => [
@@ -56,9 +54,9 @@ return [
              * Middleware allows to prevent unexpected access to API documentation
             */
             'middleware' => [
-                'api' => [],
-                'asset' => [],
-                'docs' => [],
+                'api'             => [],
+                'asset'           => [],
+                'docs'            => [],
                 'oauth2_callback' => [],
             ],
             /*
@@ -173,10 +171,10 @@ return [
                 // ],
                 // ],
                 'sanctum' => [ // Unique name of security
-                    'type' => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
+                    'type'        => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
                     'description' => 'Enter token in format (Bearer <token>)',
-                    'name' => 'Authorization', // The name of the header or query parameter to be used.
-                    'in' => 'header', // The location of the API key. Valid values are "query" or "header".
+                    'name'        => 'Authorization', // The name of the header or query parameter to be used.
+                    'in'          => 'header', // The location of the API key. Valid values are "query" or "header".
                 ],
             ],
             'security' => [
@@ -242,7 +240,7 @@ return [
                  * If set to true, it persists authorization data, and it would not be lost on browser close/refresh
                  */
                 'persist_authorization' => env('L5_SWAGGER_UI_PERSIST_AUTHORIZATION', false),
-                'oauth2' => [
+                'oauth2'                => [
                     /*
                     * If set to true, adds PKCE to AuthorizationCodeGrant flow
                     */

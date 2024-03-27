@@ -30,45 +30,54 @@ class Employee extends Model
         'acount_no',
         'bank_name',
         'branch_name',
-        'status'
+        'status',
     ];
 
     //gives the defualt value of status as 1
     protected $attributes = [
         'status' => '1',
     ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
+
     public function media()
     {
         return $this->belongsTo(Media::class);
     }
+
     public function designation()
     {
         return $this->belongsTo(Designation::class);
     }
+
     public function duties()
     {
         return $this->hasMany(Duty::class);
     }
+
     public function employeeTransfers()
     {
         return $this->hasMany(EmployeeTransfer::class);
     }
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
     }
+
     public function attendanceRosters()
     {
         return $this->hasMany(AttendanceRoster::class);
     }
+
     public function attendanceReport()
     {
         return $this->hasMany(AttendanceReport::class);

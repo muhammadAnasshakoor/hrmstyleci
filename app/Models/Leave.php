@@ -22,25 +22,23 @@ class Leave extends Model
         'status',
     ];
 
-//gives the defualt value of status as 1
-protected $attributes = [
-    'status' => 'pending'
-];
+    //gives the defualt value of status as 1
+    protected $attributes = [
+        'status' => 'pending',
+    ];
 
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 
-public function tenant()
-{
-    return $this->belongsTo(Tenant::class);
-}
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
 
-public function employee()
-{
-    return $this->belongsTo(Employee::class);
-}
-public function user()
-{
-    return $this->belongsTo(User::class);
-}
-
-
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

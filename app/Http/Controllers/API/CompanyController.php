@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Mail\CreateCompany;
-use App\Models\Company;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Media;
-use Spatie\Permission\Models\Role;
-use App\Models\Tenant;
-use Illuminate\Support\Facades\Mail; // Import Mail facade
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\CreateCompanyRequest;
 use App\Http\Requests\CreateUserRequest;
-use App\Models\User_type;
+use App\Models\Company;
+use App\Models\Media;
+use App\Models\Tenant;
+use App\Models\User; // Import Mail facade
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 /**
  * @OA\Tag(
@@ -25,39 +22,32 @@ use Illuminate\Http\Response;
  *     description="Handling the crud of company in it."
  * )
  */
-
-
 class CompanyController extends Controller
 {
-
     /**
      * @OA\Get(
      *      path="/api/company",
      *      summary="Get All active companies.Permission required = company.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Company"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
-
-
     public function __construct()
     {
         // Apply middleware to all methods in the controller
         $this->middleware('checkPermission:company.list')->only('index', 'inactiveCompanies');
         $this->middleware('checkPermission:company.create')->only('create');
-        $this->middleware('checkPermission:company.store')->only('store',);
+        $this->middleware('checkPermission:company.store')->only('store');
         $this->middleware('checkPermission:company.edit')->only('show');
         $this->middleware('checkPermission:company.update')->only('update');
         $this->middleware('checkPermission:company.delete')->only('delete');
     }
 
-
     public function index()
     {
-
         $LoggedInUser = auth::user();
         if ($LoggedInUser->tenant) {
             $loggedInTenant = $LoggedInUser->tenant;
@@ -89,14 +79,12 @@ class CompanyController extends Controller
                 }
             }
 
-
             return response()->json([
-                'message' => 'Successfully retrieved active companies.',
+                'message'   => 'Successfully retrieved active companies.',
                 'companies' => $companies,
             ], 200);
         }
     }
-
 
     /**
      * @OA\Get(
@@ -104,13 +92,13 @@ class CompanyController extends Controller
      *      summary="Get All inactive companies.Permission required = company.list",
      *      description="This endpoint retrieves information about something.",
      *      tags={"Company"},
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
     public function inactiveCompanies()
     {
-
         $LoggedInUser = auth::user();
         if ($LoggedInUser->tenant) {
             $loggedInTenant = $LoggedInUser->tenant;
@@ -142,13 +130,13 @@ class CompanyController extends Controller
                 }
             }
 
-
             return response()->json([
-                'message' => 'Successfully retrieved inactive companies.',
+                'message'   => 'Successfully retrieved inactive companies.',
                 'companies' => $companies,
             ], 200);
         }
     }
+
     /**
      * @OA\Get(
      *      path="/api/company/{id}",
@@ -161,27 +149,26 @@ class CompanyController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the company ",
+     *
      *         @OA\Schema(
      *             type="integer",
      *
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
      */
-
     public function show(string $id)
     {
-
         $company = Company::with('user')->findOrFail($id);
         // handling the logo in this case
 
         $companylogoid = $company->logo_media_id;
         $logomedia = 'null';
         if ($companylogoid !== null) {
-
             $logomedia = Media::where('id', $companylogoid)->first();
             if ($logomedia) {
                 $logomediapathurl = asset("storage/{$logomedia->media_path}");
@@ -192,19 +179,17 @@ class CompanyController extends Controller
         $companydocumentid = $company->document_media_id;
         $documentmedia = 'null';
         if ($companylogoid !== null) {
-
             $documentmedia = Media::where('id', $companydocumentid)->first();
             if ($documentmedia) {
-
-
                 $documentmediapathurl = asset("storage/{$documentmedia->media_path}");
                 $documentmedia['media_path'] = $documentmediapathurl;
             }
         }
+
         return response()->json([
-            'company' => $company,
-            'logomedia' => $logomedia,
-            'documentmedia' => $documentmedia
+            'company'       => $company,
+            'logomedia'     => $logomedia,
+            'documentmedia' => $documentmedia,
         ], 200);
     }
 
@@ -214,11 +199,15 @@ class CompanyController extends Controller
      *     summary="Create a new company.Permission required = company.store",
      *     description="This endpoint creates a new company.",
      *     tags={"Company"},
+     *
      *     @OA\RequestBody(
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -285,7 +274,6 @@ class CompanyController extends Controller
      *                     example="03452987687",
      *                     description="The phone_no of the company=>nullable"
      *                 ),
-     *
      *                            @OA\Property(
      *                     property="document_media_id",
      *                     type="file",
@@ -301,16 +289,17 @@ class CompanyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="201", description="Company created successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
     public function store(CreateCompanyRequest $companyRequest, CreateUserRequest $userRequest)
     {
         $companydata = $companyRequest->validated();
         $userdata = $userRequest->validated();
+
         try {
             DB::beginTransaction();
             // creating new user
@@ -320,7 +309,7 @@ class CompanyController extends Controller
             $loggedinuserid = $loggedinuser->id;
             if (isset($userdata['password']) && $userdata['password'] != null) {
                 $additionalUserData = [
-                    'modified_by' => $loggedinuserid
+                    'modified_by' => $loggedinuserid,
                 ];
                 // if user enter the password
                 $password = $companyRequest->input('password');
@@ -328,8 +317,8 @@ class CompanyController extends Controller
                 $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}|:<>?-=[];\',./';
                 $password = substr(str_shuffle($characters), 0, 8);
                 $additionalUserData = [
-                    'password' => $password,
-                    'modified_by' => $loggedinuserid
+                    'password'    => $password,
+                    'modified_by' => $loggedinuserid,
                 ];
             }
             if ($companyRequest->hasFile('logo_media_id')) {
@@ -339,12 +328,12 @@ class CompanyController extends Controller
                 $logoextension = $logofile->getClientOriginalExtension();
                 // creating the new media for the logo
                 $logomedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $logo_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $logo_name,
                     'media_path' => $logopath,
-                    'extension' => $logoextension
+                    'extension'  => $logoextension,
                 ]);
-                $companydata['logo_media_id']  = $logomedia->id;
+                $companydata['logo_media_id'] = $logomedia->id;
             }
             // handling the document from the company
             if ($companyRequest->hasFile('document_media_id')) {
@@ -354,10 +343,10 @@ class CompanyController extends Controller
                 $documentextension = $documentfile->getClientOriginalExtension();
                 // creating the newmedia for the logo
                 $documentmedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $document_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $document_name,
                     'media_path' => $documentpath,
-                    'extension' => $documentextension
+                    'extension'  => $documentextension,
                 ]);
                 $companydata['document_media_id'] = $documentmedia->id;
             }
@@ -366,12 +355,11 @@ class CompanyController extends Controller
             $newuser = User::create($mergedUserData);
 
             // creating new company
-            $newcompany =  $newuser->company()->create($companydata);
+            $newcompany = $newuser->company()->create($companydata);
 
             // associating the company with the tenant
             $tenantaccociated = $loggedinuser->tenant;
             if ($tenantaccociated) {
-
                 $tenantaccociated->companies()->save($newcompany);
             }
             // Create or find the company role
@@ -384,9 +372,9 @@ class CompanyController extends Controller
 
             // sending the emial to company with login credentials.
             $data = [
-                'name' => $newcompany->name,
-                'email' => $newuser->email,
-                'password' => $password
+                'name'     => $newcompany->name,
+                'email'    => $newuser->email,
+                'password' => $password,
             ];
 
             $email = $newuser->email;
@@ -397,16 +385,18 @@ class CompanyController extends Controller
                 $message->subject('Login credentials');
             });
             DB::commit();
+
             return response()->json([
                 'message' => 'Company and associated user are created successfully',
                 'company' => $newcompany,
-                'user'  => $newuser
+                'user'    => $newuser,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -415,30 +405,34 @@ class CompanyController extends Controller
     {
     }
 
-
-
     /**
      * @OA\Post(
      *     path="/api/company/{company}",
      *     summary="Update the company.Permission required = company.update",
      *     description="This endpoint updates a company.",
      *     tags={"Company"},
+     *
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
      *         description="The ID of the company to be updated",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=false,
+     *
      *         @OA\MediaType(
      *             mediaType="application/x-www-form-urlencoded",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -505,7 +499,6 @@ class CompanyController extends Controller
      *                     example="03452987687",
      *                     description="The phone_no of the company=>nullable"
      *                 ),
-     *
      *                            @OA\Property(
      *                     property="document_media_id",
      *                     type="file",
@@ -518,21 +511,17 @@ class CompanyController extends Controller
      *                     example="",
      *                     description="The logo_media of the company=>nullable"
      *                 ),
-     *
-     *
-     *             )
-     *         )
      *     ),
      *     @OA\Response(response="200", description="Company updated successfully"),
      *     @OA\Response(response="401", description="Unauthorized"),
      *     @OA\Response(response="422", description="Validation failed")
      * )
      */
-
     public function update(CreateCompanyRequest $companyRequest, Company $company)
     {
         $companydata = $companyRequest->validated();
         DB::beginTransaction();
+
         try {
             // handling the update  of user
 
@@ -546,12 +535,10 @@ class CompanyController extends Controller
             $loggedinuser = auth::user();
             $loggedinuserid = $loggedinuser->id;
             $updateduser = [
-                'status' => $status,
-                'modified_by' => $loggedinuserid
+                'status'      => $status,
+                'modified_by' => $loggedinuserid,
             ];
             $user->update($updateduser);
-
-
 
             if ($companyRequest->hasFile('logo_media_id')) {
                 if ($company->logo_media_id) {
@@ -567,12 +554,12 @@ class CompanyController extends Controller
                 $logoextension = $logofile->getClientOriginalExtension();
                 // creating the new media for the logo
                 $logomedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $logo_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $logo_name,
                     'media_path' => $logopath,
-                    'extension' => $logoextension
+                    'extension'  => $logoextension,
                 ]);
-                $companydata['logo_media_id']  = $logomedia->id;
+                $companydata['logo_media_id'] = $logomedia->id;
             }
             // handling the document from the company
             if ($companyRequest->hasFile('document_media_id')) {
@@ -589,10 +576,10 @@ class CompanyController extends Controller
                 $documentextension = $documentfile->getClientOriginalExtension();
                 // creating the newmedia for the logo
                 $documentmedia = Media::create([
-                    'user_id' => $loggedinuserid,
-                    'media_name' =>  $document_name,
+                    'user_id'    => $loggedinuserid,
+                    'media_name' => $document_name,
                     'media_path' => $documentpath,
-                    'extension' => $documentextension
+                    'extension'  => $documentextension,
                 ]);
                 $companydata['document_media_id'] = $documentmedia->id;
             }
@@ -609,33 +596,36 @@ class CompanyController extends Controller
             }
             //if the company status is inactive then all duties related to it should be inactive
             if ($company->status == '0') {
-                $duties =  $company->duties;
+                $duties = $company->duties;
                 foreach ($duties as $duty) {
                     $duty->update(['status' => '0']);
                 }
             }
 
             if ($company->status == '1') {
-                $duties =  $company->duties;
+                $duties = $company->duties;
                 foreach ($duties as $duty) {
                     $duty->update(['status' => '1']);
                 }
             }
 
             DB::commit();
+
             return response()->json([
                 'message' => 'The company have been updated',
 
-                'company' => $company
+                'company' => $company,
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
                 'message' => 'There was an error',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ]);
         }
     }
+
     /**
      * @OA\Delete(
      *      path="/api/company/{id}",
@@ -648,11 +638,13 @@ class CompanyController extends Controller
      *         in="path",
      *         required=true,
      *         description="The ID of the company to be deleted",
+     *
      *         @OA\Schema(
      *             type="integer",
      *             format="int64"
      *         )
      *     ),
+     *
      *      @OA\Response(response="200", description="Successful operation"),
      *      @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -661,7 +653,6 @@ class CompanyController extends Controller
     {
         try {
             DB::beginTransaction();
-
 
             $duties = $company->duties()->where('status', '1')->count();
             if ($duties > 0) {
@@ -687,15 +678,17 @@ class CompanyController extends Controller
                 }
             }
             DB::commit();
+
             return response()->json([
                 'message' => 'Company  and  associated user are  deleted successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
 
                 'message' => 'There was an error deleting the company and associated user',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }

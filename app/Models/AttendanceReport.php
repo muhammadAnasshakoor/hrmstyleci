@@ -27,15 +27,18 @@ class AttendanceReport extends Model
         'expected_time',
     ];
 
-    public function employee(){
+    public function employee()
+    {
         return $this->belongsTo(Employee::class);
     }
 
-    public function tenant(){
+    public function tenant()
+    {
         return $this->belongsTo(Tenant::class);
     }
-    public function attendance(){
+
+    public function attendance()
+    {
         return $this->belongsTo(Attendance::class);
     }
-
 }

@@ -19,8 +19,8 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         \App\Events\NotifyUser::class => [
-            \App\Listeners\UserNotificationListener::class
-        ]
+            \App\Listeners\UserNotificationListener::class,
+        ],
     ];
 
     /**
@@ -28,7 +28,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
     }
 
     /**

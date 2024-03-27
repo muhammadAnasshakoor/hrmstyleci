@@ -1,12 +1,14 @@
 <?php
+
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\ValidationErrorTrait;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CreateSubscriberRequest extends FormRequest
 {
     use ValidationErrorTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -22,14 +24,13 @@ class CreateSubscriberRequest extends FormRequest
      */
     public function rules(): array
     {
-
         return [
-            'tenant_id' => 'required',
+            'tenant_id'            => 'required',
             'subscription_plan_id' => 'required',
-            'user_id' => 'nullable',
-            'start_date' => 'required|date_format:Y-m-d',
-            'end_date' => 'required|date_format:Y-m-d',
-            'amount' => 'nullable',
-            'status' => 'nullable|regex:/^[01]$/',        ];
+            'user_id'              => 'nullable',
+            'start_date'           => 'required|date_format:Y-m-d',
+            'end_date'             => 'required|date_format:Y-m-d',
+            'amount'               => 'nullable',
+            'status'               => 'nullable|regex:/^[01]$/',        ];
     }
 }

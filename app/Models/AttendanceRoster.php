@@ -19,12 +19,14 @@ class AttendanceRoster extends Model
         'date',
         'holiday',
         'check_in',
-        'check_out',    
+        'check_out',
     ];
+
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
     }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);
